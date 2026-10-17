@@ -31,7 +31,7 @@ AK.FIREBASE_CONFIG = {
 
 // 先生のメールアドレス（クラス作成・ダッシュボードが使える人）。firestore.rules にも同じものを書く
 AK.TEACHER_EMAILS = [
-  // 'sensei@example.ed.jp',
+  'agrimuitobom@gmail.com',
 ];
 
 // ログインできるメールのドメイン（例：'example.ed.jp'）。空文字ならどのGoogleアカウントでもOK

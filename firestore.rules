@@ -7,7 +7,7 @@ service cloud.firestore {
     // ★ 先生のメールアドレス（js/firebase-config.js の TEACHER_EMAILS と同じものを書く）
     function isTeacher() {
       return request.auth != null && request.auth.token.email in [
-        'sensei@example.ed.jp'
+        'agrimuitobom@gmail.com'
       ];
     }
 
