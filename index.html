@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#4caf50">
+  <title>アグリキングダム</title>
+  <meta name="description" content="農業高校の知識（野菜・草花・果樹・作物）を問題で学び、自分の王国を育てる学習ゲーム">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <header id="topbar"></header>
+    <main id="view"></main>
+    <nav id="tabbar"></nav>
+  </div>
+  <div id="quiz-root"></div>
+  <div id="modal-root"></div>
+  <div id="toast-root"></div>
+  <canvas id="fx"></canvas>
+
+  <!-- データ（教員が編集しやすいよう分離） -->
+  <script src="js/data/questions.js"></script>
+  <script src="js/data/items.js"></script>
+  <!-- ゲーム本体 -->
+  <script src="js/core.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/farm.js"></script>
+  <script src="js/screens.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

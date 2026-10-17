@@ -1,0 +1,377 @@
+/*
+ * クイズ：修行 / 復習ノート / 鑑定競技 / 昇格試験 / 病害虫トラブル
+ */
+(function (AK) {
+  'use strict';
+  const { h } = AK;
+  const LABELS = ['A', 'B', 'C', 'D'];
+  const RANK_ORDER = { N: 0, R: 1, SR: 2, SSR: 3 };
+  const COMBO_MILESTONES = [3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100];
+  const MODE_TITLE = { train: '修行', review: '復習ノート', kantei: '鑑定競技', exam: '昇格試験', trouble: 'トラブル発生！' };
+
+  // ---------- 出題（同じ問題が続かないよう山札方式） ----------
+  const decks = {};
+  let byId = null;
+  AK.qById = (id) => {
+    if (!byId) { byId = {}; AK.QUESTIONS.forEach((q) => { byId[q.id] = q; }); }
+    return byId[id];
+  };
+  function draw(field) {
+    if (!decks[field] || !decks[field].length) {
+      decks[field] = AK.shuffle(AK.QUESTIONS.filter((q) => field === 'mix' || q.f === field));
+    }
+    return decks[field].pop();
+  }
+  function drawMany(field, n) {
+    const out = [], seen = new Set();
+    for (let guard = 0; out.length < n && guard < 500; guard++) {
+      const q = draw(field);
+      if (!seen.has(q.id)) { seen.add(q.id); out.push(q); }
+    }
+    return out;
+  }
+
+  // ---------- ドロップ演出（宝箱 → カード） ----------
+  AK.showDrops = function (container, drops, sub) {
+    const chest = h('div', { class: 'chest' }, '🎁');
+    const wrap = h('div', { class: 'drops' }, chest);
+    container.append(wrap);
+    if (sub) container.append(h('div', { class: 'reward-sub' }, sub));
+    if (!drops.length) { wrap.remove(); return; }
+    const best = drops.reduce((m, d) => Math.max(m, RANK_ORDER[AK.ITEMS[d.id].rarity]), 0);
+    if (best >= 2) chest.classList.add(best === 3 ? 'glow-ssr' : 'glow-sr');
+    AK.Sound.play('chest');
+    setTimeout(() => {
+      wrap.innerHTML = '';
+      drops.forEach((d, i) => {
+        const it = AK.ITEMS[d.id];
+        wrap.append(h('div', { class: `card r-${it.rarity}${it.gold ? ' gold' : ''}`, style: { animationDelay: (i * 0.12) + 's' } },
+          d.isNew ? h('div', { class: 'new' }, 'NEW!') : null,
+          h('div', { class: 'c-emoji' }, it.emoji),
+          h('div', { class: 'c-name' }, it.name),
+          h('div', { class: 'c-rar' }, it.rarity)));
+      });
+      if (!wrap.isConnected) return;
+      const c = AK.centerOf(wrap);
+      if (best === 3) {
+        AK.Sound.play('ssr'); AK.flash('gold'); AK.bigText('LEGEND!!', 'legend');
+        AK.FX.confetti(180, { x: c.x, y: c.y, colors: ['#ffd700', '#fff6a5', '#ffb300', '#ffffff', '#ff7af6'] });
+      } else if (best === 2) {
+        AK.Sound.play('rare'); AK.bigText('SUPER RARE!', 'sr');
+        AK.FX.confetti(80, { x: c.x, y: c.y, colors: ['#c084fc', '#a855f7', '#f0abfc', '#ffffff'] });
+      } else if (best === 1) {
+        AK.Sound.play('reveal');
+        AK.FX.confetti(30, { x: c.x, y: c.y, colors: ['#60a5fa', '#93c5fd', '#ffffff'] });
+      } else AK.Sound.play('reveal');
+    }, best >= 2 ? 1100 : 550);
+  };
+  AK.rollAndGive = function (n, field, combo) {
+    const drops = [];
+    for (let i = 0; i < n; i++) {
+      const id = AK.rollDrop(field, combo);
+      drops.push({ id, isNew: AK.addItem(id) });
+    }
+    return drops;
+  };
+
+  // ---------- セッション ----------
+  let s = null, root = null, timer = null, keyHandler = null;
+
+  function start(opts) {
+    root = document.getElementById('quiz-root');
+    let queue = opts.queue || null;
+    if (opts.mode === 'kantei') queue = AK.shuffle(Object.keys(AK.FIELDS).flatMap((f) => drawMany(f, 5)));
+    if (opts.mode === 'exam') queue = drawMany('mix', opts.count || 5);
+    if (opts.mode === 'trouble') queue = drawMany(opts.field, 1);
+    s = {
+      opts, mode: opts.mode, field: opts.field || 'mix', queue,
+      total: queue ? queue.length : Infinity,
+      idx: 0, correct: 0, combo: 0, maxCombo: 0, results: [],
+    };
+    root.className = 'open';
+    keyHandler = onKey;
+    document.addEventListener('keydown', keyHandler);
+    renderQ();
+  }
+
+  function close() {
+    clearTimer();
+    if (keyHandler) document.removeEventListener('keydown', keyHandler);
+    keyHandler = null;
+    root.className = '';
+    root.innerHTML = '';
+    const o = s && s.opts;
+    s = null;
+    AK.save();
+    AK.emit('change');
+    if (o && o.onClose) o.onClose();
+  }
+
+  function quit() {
+    if (!s) return;
+    if ((s.mode === 'kantei' || s.mode === 'exam') && s.results.length) {
+      AK.confirm('途中でやめますか？（結果は記録されません）', close);
+      return;
+    }
+    if ((s.mode === 'train' || s.mode === 'review') && s.results.length) {
+      AK.toast(`今回の成績：${s.results.length}問中 ${s.correct}問正解／最大 ${s.maxCombo}コンボ`);
+    }
+    close();
+  }
+
+  function onKey(e) {
+    if (!s || document.querySelector('.modal-back')) return;
+    if (!s.answered && s.choices) {
+      const i = '1234'.indexOf(e.key) >= 0 ? '1234'.indexOf(e.key) : 'abcd'.indexOf(e.key.toLowerCase());
+      if (i >= 0 && s.choices[i]) { e.preventDefault(); answer(s.choices[i]); }
+    } else if (s.next && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      s.next();
+    }
+  }
+
+  function renderQ() {
+    clearTimer();
+    const q = s.queue ? s.queue[s.idx] : draw(s.field);
+    s.q = q;
+    s.answered = false;
+    s.next = null;
+    s.choices = AK.shuffle(q.c.map((t, i) => ({ t, ok: i === 0 })));
+    const F = AK.FIELDS[q.f];
+
+    root.innerHTML = '';
+    root.classList.toggle('fever', s.combo >= 5);
+    const head = h('div', { class: 'q-head' },
+      h('button', { class: 'q-quit', onclick: quit, 'aria-label': 'やめる' }, '✕'),
+      h('div', { class: 'q-title' }, s.opts.title || MODE_TITLE[s.mode]),
+      h('div', { class: 'q-prog' }, s.queue ? `${s.idx + 1} / ${s.total}` : `第${s.idx + 1}問`));
+    s.comboEl = h('div', { class: 'q-combo' });
+    updateCombo();
+    const timerBar = s.mode === 'kantei' ? h('div', { class: 'q-timer' }, h('i')) : null;
+    const card = h('div', { class: 'q-card' },
+      h('div', { class: 'q-field', style: { background: F.color } }, `${F.icon} ${F.name}`),
+      s.opts.intro && s.idx === 0 ? h('div', { class: 'q-intro' }, s.opts.intro) : null,
+      q.img ? h('img', { class: 'q-img', src: q.img, alt: '' }) : null,
+      h('div', { class: 'q-text' }, q.q));
+    const list = h('div', { class: 'q-choices' });
+    s.choices.forEach((c, i) => {
+      c.el = h('button', { class: 'choice', onclick: () => answer(c) },
+        h('span', { class: 'lbl' }, LABELS[i]), h('span', { class: 'txt' }, c.t));
+      list.append(c.el);
+    });
+    s.fb = h('div', { class: 'q-feedback' });
+    const body = h('div', { class: 'q-body' }, s.comboEl, timerBar, card, list, s.fb);
+    root.append(head, body);
+    if (timerBar) startTimer(timerBar.firstChild);
+  }
+
+  function startTimer(bar) {
+    const limit = s.opts.timeLimit || 20;
+    const t0 = Date.now();
+    timer = setInterval(() => {
+      const r = 1 - (Date.now() - t0) / 1000 / limit;
+      bar.style.width = Math.max(0, r * 100) + '%';
+      bar.classList.toggle('low', r < 0.3);
+      if (r <= 0) { clearTimer(); answer(null); }
+    }, 100);
+  }
+  function clearTimer() {
+    if (timer) { clearInterval(timer); timer = null; }
+  }
+
+  function updateCombo() {
+    const c = s.combo;
+    s.comboEl.className = 'q-combo' + (c >= 5 ? ' hot' : '');
+    s.comboEl.textContent = c >= 2 ? `🔥 ${c} COMBO${c >= 5 ? '　FEVER中！報酬2倍' : ''}` : '';
+  }
+
+  function answer(c) {
+    if (!s || s.answered) return;
+    s.answered = true;
+    clearTimer();
+    const q = s.q, ok = !!(c && c.ok), S = AK.S;
+    s.choices.forEach((x) => { x.el.disabled = true; if (x.ok) x.el.classList.add('correct'); });
+    if (c && !ok) c.el.classList.add('wrong');
+
+    S.stats.answered++;
+    S.stats.byField[q.f].a++;
+    s.results.push({ q, ok, chosen: c ? c.t : '（時間切れ）' });
+    const at = c ? AK.centerOf(c.el) : { x: innerWidth / 2, y: innerHeight / 2 };
+
+    if (ok) {
+      s.correct++; s.combo++;
+      s.maxCombo = Math.max(s.maxCombo, s.combo);
+      S.stats.correct++;
+      S.stats.byField[q.f].c++;
+      S.stats.bestCombo = Math.max(S.stats.bestCombo, s.combo);
+      if (s.mode === 'review' && S.wrong.includes(q.id)) {
+        S.wrong = S.wrong.filter((id) => id !== q.id);
+        S.stats.reviewed++;
+        AK.track('review');
+      }
+      AK.track('correct');
+      AK.track('correct_' + q.f);
+      AK.track('combo', s.combo);
+      AK.Sound.play('correct', s.combo);
+      if (s.mode !== 'kantei') AK.floatText(s.mode === 'review' ? '克服！' : '正解！', at.x, at.y - 20, 'good');
+      AK.FX.confetti(16 + Math.min(s.combo, 10) * 4, { x: at.x, y: at.y, spread: 8 });
+      comboEffects();
+    } else {
+      s.combo = 0;
+      if (!S.wrong.includes(q.id)) S.wrong.push(q.id);
+      AK.Sound.play('wrong');
+      root.classList.remove('fever');
+      root.classList.add('shake');
+      setTimeout(() => root.classList.remove('shake'), 400);
+    }
+    updateCombo();
+    afterAnswer(ok);
+    AK.save();
+    AK.emit('change');
+  }
+
+  function comboEffects() {
+    const c = s.combo;
+    if (!COMBO_MILESTONES.includes(c)) return;
+    setTimeout(() => {
+      AK.Sound.play('combo', c);
+      if (c === 5) {
+        AK.bigText('🔥FEVER!!🔥', 'fever');
+        root.classList.add('fever');
+      } else AK.bigText(`${c} COMBO!`, c >= 10 ? 'mega' : '');
+      if (c >= 10) AK.flash('');
+    }, 250);
+  }
+
+  function afterAnswer(ok) {
+    const q = s.q;
+    if (s.mode === 'kantei') {
+      AK.bigText(ok ? '⭕' : '❌', 'mark ' + (ok ? 'good' : 'bad'));
+      s.next = advance;
+      setTimeout(() => { if (s && s.next === advance) advance(); }, 800);
+      return;
+    }
+    const fb = s.fb;
+    fb.append(
+      h('div', { class: 'verdict ' + (ok ? 'ok' : 'ng') }, ok ? '⭕ 正解！' : '❌ 不正解…'),
+      h('div', { class: 'explain' }, h('b', {}, '💡 解説　'), q.e));
+    if (ok && (s.mode === 'train' || s.mode === 'review')) giveRewards(fb);
+    if (!ok && s.mode !== 'review') fb.append(h('div', { class: 'note' }, '📕 復習ノートに追加しました'));
+    if (s.mode === 'trouble' && !ok) fb.append(h('div', { class: 'note' }, '病害虫はまだ残っている…。もう一度タップして再挑戦しよう！'));
+
+    let label = '次の問題 ▶';
+    if (s.mode === 'trouble') label = '王国にもどる';
+    else if (s.queue && s.idx >= s.total - 1) label = '結果を見る ▶';
+    s.next = advance;
+    fb.append(h('button', { class: 'btn primary big next-btn', onclick: () => s && s.next && s.next() }, label));
+    setTimeout(() => fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
+  }
+
+  function giveRewards(fb) {
+    const fever = s.combo >= 5;
+    const xp = 10 + Math.min(s.combo, 10) * 2 + (s.mode === 'review' ? 15 : 0);
+    const coins = fever ? 6 : 3;
+    const drops = AK.rollAndGive(fever ? 2 : 1, s.q.f, s.combo + (s.mode === 'review' ? 5 : 0));
+    AK.addCoins(coins);
+    const box = h('div', { class: 'reward' });
+    fb.append(box);
+    AK.showDrops(box, drops, `+${xp} XP　+${coins} 💰${fever ? '　（FEVER 2倍！）' : ''}`);
+    AK.addXP(xp);
+  }
+
+  function advance() {
+    if (!s) return;
+    s.next = null;
+    if (s.mode === 'trouble') {
+      const ok = s.results[0].ok, o = s.opts;
+      close();
+      if (o.onDone) o.onDone(ok);
+      return;
+    }
+    s.idx++;
+    if (s.queue && s.idx >= s.total) { finish(); return; }
+    renderQ();
+  }
+
+  // ---------- 結果画面 ----------
+  function resultScreen(...nodes) {
+    root.innerHTML = '';
+    root.classList.remove('fever');
+    root.append(h('div', { class: 'q-head' }, h('div', { class: 'q-title' }, s.opts.title || MODE_TITLE[s.mode])),
+      h('div', { class: 'q-body result' }, ...nodes));
+  }
+  function resultList() {
+    return h('div', { class: 'res-list' }, h('h3', {}, '📝 ふりかえり'),
+      s.results.map((r, i) => h('details', { class: 'res-item ' + (r.ok ? 'ok' : 'ng') },
+        h('summary', {}, `${r.ok ? '⭕' : '❌'} ${i + 1}. ${r.q.q}`),
+        h('div', { class: 'res-detail' },
+          h('div', {}, `あなたの答え：${r.chosen}`),
+          h('div', {}, `正解：${r.q.c[0]}`),
+          h('div', { class: 'explain' }, '💡 ' + r.q.e)))));
+  }
+
+  function finish() {
+    clearTimer();
+    if (s.mode === 'kantei') finishKantei();
+    else if (s.mode === 'exam') finishExam();
+    else finishReview();
+  }
+
+  function finishKantei() {
+    const S = AK.S, n = s.correct, total = s.total;
+    const rank = n >= 18 ? 'S' : n >= 15 ? 'A' : n >= 12 ? 'B' : 'C';
+    const isBest = n > S.best.kantei;
+    if (isBest) S.best.kantei = n;
+    if (rank === 'S') S.stats.kanteiS++;
+    AK.track('kantei');
+    const coins = n * 5, xp = n * 8;
+    AK.addCoins(coins);
+    const drops = AK.rollAndGive({ S: 3, A: 2, B: 1, C: 0 }[rank], 'mix', 10);
+
+    const byField = {};
+    s.results.forEach((r) => {
+      byField[r.q.f] = byField[r.q.f] || { a: 0, c: 0 };
+      byField[r.q.f].a++;
+      if (r.ok) byField[r.q.f].c++;
+    });
+    const rewardBox = h('div', { class: 'reward' });
+    resultScreen(
+      h('div', { class: 'rank rank-' + rank }, rank),
+      h('div', { class: 'score' }, `${n} / ${total} 問正解`),
+      isBest ? h('div', { class: 'best' }, '🎉 自己ベスト更新！') : null,
+      h('div', { class: 'field-break' }, Object.entries(byField).map(([f, v]) =>
+        h('div', { class: 'fb-item', style: { '--fc': AK.FIELDS[f].color } }, `${AK.FIELDS[f].icon} ${AK.FIELDS[f].name}`, h('b', {}, ` ${v.c}/${v.a}`)))),
+      rewardBox,
+      h('div', { class: 'res-btns' },
+        h('button', { class: 'btn', onclick: close }, 'とじる'),
+        h('button', { class: 'btn primary', onclick: () => { const o = s.opts; close(); start(o); } }, 'もう一度')),
+      resultList());
+    AK.showDrops(rewardBox, drops, `+${xp} XP　+${coins} 💰`);
+    AK.addXP(xp);
+    if (rank === 'S') { AK.Sound.play('ssr'); AK.FX.confetti(160); }
+    else if (rank === 'A') { AK.Sound.play('rare'); AK.FX.confetti(80); }
+    AK.save();
+  }
+
+  function finishExam() {
+    const need = s.opts.need || 4, pass = s.correct >= need, o = s.opts;
+    resultScreen(
+      h('div', { class: 'exam-result ' + (pass ? 'pass' : 'fail') }, pass ? '🎉 合格！' : '😢 不合格…'),
+      h('div', { class: 'score' }, `${s.correct} / ${s.total} 問正解（合格ライン ${need}問）`),
+      h('p', { class: 'center' }, pass ? '領土を広げる許可がおりました！' : '解説を読んで、もう一度チャレンジしよう！'),
+      h('div', { class: 'res-btns' }, h('button', { class: 'btn primary big', onclick: () => { close(); if (o.onDone) o.onDone(pass); } }, pass ? '領土を広げる！' : 'もどる')),
+      resultList());
+    if (pass) { AK.Sound.play('levelup'); AK.FX.confetti(120); }
+  }
+
+  function finishReview() {
+    resultScreen(
+      h('div', { class: 'exam-result pass' }, '📕 復習おつかれさま！'),
+      h('div', { class: 'score' }, `${s.correct} / ${s.total} 問克服`),
+      h('p', { class: 'center' }, `復習ノートの残り：${AK.S.wrong.length}問`),
+      h('div', { class: 'res-btns' }, h('button', { class: 'btn primary big', onclick: close }, 'とじる')),
+      resultList());
+  }
+
+  AK.Quiz = { start, isOpen: () => !!s };
+})(window.AK);
