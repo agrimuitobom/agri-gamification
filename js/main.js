@@ -167,7 +167,11 @@
     installEvent = null;
     if (AK.refresh) AK.refresh();
   };
-  AK.installButton = () => (installEvent ? h('button', { class: 'btn small install-btn', onclick: AK.install }, '📲 アプリとしてインストール') : null);
+  AK.installButton = () => {
+    if (installEvent) return h('button', { class: 'btn small install-btn', onclick: AK.install }, '📲 アプリとしてインストール');
+    if (AK.Install && AK.Install.isIOS && !AK.Install.standalone()) return h('button', { class: 'btn small install-btn', onclick: () => AK.Install.show(true) }, '📲 ホーム画面に追加する方法');
+    return null;
+  };
 
   function init() {
     AK.load();
@@ -176,6 +180,7 @@
       navigator.serviceWorker.register('sw.js').catch(() => { /* オフライン対応は任意 */ });
     }
     document.addEventListener('pointerdown', () => AK.Sound.ensure(), { once: true });
+    AK.Install.maybeShow(); // スマホでまだアプリとして開いていなければ「ホーム画面に追加」を案内
     AK.Cloud.start(() => {
       try { startGame(); } catch (e) { AK.reportError('起動', e); }
     });

@@ -241,9 +241,9 @@
           AK.Cloud.isTeacher() ? h('a', { class: 'btn small primary', href: 'teacher.html' }, '👨‍🏫 先生用ページ') : null,
           h('button', { class: 'btn small danger', onclick: () => AK.confirm('ログアウトしますか？', () => { AK.Cloud.signOut(); }) }, '🚪 ログアウト')));
     }
-    const install = AK.canInstall() ? h('div', { class: 'panel' }, h('h3', {}, '📲 アプリとして使う'),
-      h('p', { class: 'small' }, 'インストールすると、デスクトップやスタートメニューから全画面ですぐ起動できます。'),
-      AK.installButton()) : null;
+    const install = !AK.Install.standalone() ? h('div', { class: 'panel' }, h('h3', {}, '📲 アプリとして使う'),
+      h('p', { class: 'small' }, AK.Install.isIOS ? 'ホーム画面に追加すると、アプリのように全画面ですぐ起動できます。' : 'インストールすると、デスクトップやスタートメニューから全画面ですぐ起動できます。'),
+      AK.installButton() || h('button', { class: 'btn small', onclick: () => AK.Install.show(true) }, '📲 追加のしかた')) : null;
 
     v.append(h('div', { class: 'screen' }, profile, account, install, fieldBars, ach, settings));
   };

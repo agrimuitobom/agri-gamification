@@ -638,3 +638,23 @@ img.emo {
 .design-prev .prev-art { width: 100%; height: 100%; object-fit: cover; }
 .scenery-art.top { margin: 0 0 8px; }
 .scenery-art.top img { height: clamp(54px, 18vw, 92px); }
+
+/* ============ ホーム画面に追加（案内） ============ */
+.modal.install { max-width: 400px; }
+.inst-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.inst-head .modal-title { text-align: left; margin: 0 0 2px; font-size: 18px; }
+.inst-head p { margin: 0; }
+.inst-icon { width: 64px; height: 64px; border-radius: 15px; box-shadow: 0 3px 10px rgba(0, 0, 0, .2); flex-shrink: 0; }
+.inst-mini { width: 22px; height: 22px; border-radius: 5px; vertical-align: -5px; }
+.inst-steps { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-direction: column; gap: 8px; }
+.inst-step { display: flex; gap: 10px; align-items: flex-start; background: #f8fafc; border-radius: 12px; padding: 8px 10px; font-size: 14px; line-height: 1.6; }
+.inst-step small { display: block; color: var(--sub); font-size: 11px; line-height: 1.5; }
+.inst-num { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--green); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 13px; margin-top: 1px; }
+.ios-share, .ios-plus { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: #fff; border: 1px solid #dbeafe; vertical-align: middle; box-shadow: 0 1px 3px rgba(0, 0, 0, .1); }
+.ios-plus { color: #2563eb; font-weight: 800; font-size: 16px; }
+.inst-note { background: #ecfdf5; color: #065f46; border-radius: 10px; padding: 8px 10px; font-size: 12px; line-height: 1.6; margin: 8px 0 0; }
+.inst-arrow {
+  position: fixed; left: 50%; bottom: calc(8px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  z-index: 220; font-size: 40px; pointer-events: none; animation: instBounce 1s ease-in-out infinite;
+}
+@keyframes instBounce { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 10px); } }
