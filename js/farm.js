@@ -94,8 +94,13 @@
         grid.append(el);
       }
     }
-    const top = AK.designOf('top').row, bottom = AK.designOf('bottom').row;
-    const scenery = (row, cls) => (row ? h('div', { class: 'scenery ' + cls }, Array.from(row.replace(/\uFE0F/g, '')).map((ch) => h('span', {}, ch))) : null);
+    const top = AK.designOf('top'), bottom = AK.designOf('bottom');
+    // 景色：絵文字を並べるもの（row）と、1枚のイラスト（art）がある
+    const scenery = (d, cls) => {
+      if (d.art) return h('div', { class: 'scenery-art ' + cls }, h('img', { src: d.art, alt: d.name }));
+      if (!d.row) return null;
+      return h('div', { class: 'scenery ' + cls }, Array.from(d.row.replace(/\uFE0F/g, '')).map((ch) => h('span', {}, ch)));
+    };
     const field = h('div', { class: 'field-area' },
       scenery(top, 'top'),
       h('div', { class: 'field-wrap fence-' + (D.fence || 'default') }, grid),
@@ -413,7 +418,8 @@
             }
           },
         },
-        h('div', { class: `design-prev prev-${slot} ${slot}-${d.id || 'default'}` }, d.row ? Array.from(d.row.replace(/\uFE0F/g, '')).slice(0, 4).join('') : d.mark || ''),
+        h('div', { class: `design-prev prev-${slot} ${slot}-${d.id || 'default'}` },
+          d.art ? h('img', { class: 'prev-art', src: d.art, alt: '' }) : d.row ? Array.from(d.row.replace(/\uFE0F/g, '')).slice(0, 4).join('') : d.mark || ''),
         h('div', { class: 'design-name' }, d.name),
         h('div', { class: 'design-price' }, on ? '✅ 使用中' : owned ? '持っている' : `💰 ${d.price}`)));
       });

@@ -631,3 +631,8 @@ img.emo {
   background: rgba(255, 255, 255, .85); border-radius: 6px; padding: 0 3px; line-height: 1.4;
 }
 .tile .boost img.emo { width: 1em; height: 1em; }
+
+/* 景色のイラスト（小川など） */
+.scenery-art { margin-top: 6px; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+.scenery-art img { display: block; width: 100%; height: clamp(44px, 14vw, 72px); }
+.design-prev .prev-art { width: 100%; height: 100%; object-fit: cover; }

@@ -221,7 +221,7 @@ AK.DESIGNS = {
   bottom: [
     { id: '', name: 'なし', price: 0, row: '' },
     { id: 'sunflower', name: 'ヒマワリ畑', price: 300, row: '🌻🌻🌻🌻🌻🌻🌻' },
-    { id: 'river', name: '小川', price: 400, row: '🌊🌊🌊🌊🌊🌊🌊' },
+    { id: 'river', name: '小川', price: 400, art: 'img/scenery/river.svg' },
     { id: 'pasture', name: '牧場', price: 500, row: '🐄🐑🐔🐑🐄🐔🐑' },
     { id: 'tulip', name: 'チューリップ花壇', price: 500, row: '🌷🌷🌷🌷🌷🌷🌷' },
     { id: 'butterfly', name: 'ちょうちょ', price: 600, row: '🦋🌼🦋🌼🦋🌼🦋' },
