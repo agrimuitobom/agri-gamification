@@ -186,5 +186,24 @@
     root.append(back);
     return close;
   };
+  /** エラーを画面に表示（真っ白で止まらないように。スクショで原因がわかるよう内容も出す） */
+  AK.reportError = function (where, e) {
+    const text = `${where}：${(e && (e.code || e.name)) || ''} ${(e && e.message) || e}`;
+    console.error('[AK]', where, e);
+    let box = document.getElementById('err-box');
+    if (!box) {
+      box = h('div', { id: 'err-box' },
+        h('b', {}, '⚠️ エラーが発生しました'),
+        h('pre', {}),
+        h('div', {},
+          h('button', { class: 'btn small', onclick: () => location.reload() }, '🔄 再読み込み'),
+          h('button', { class: 'btn small', onclick: () => box.remove() }, 'とじる')));
+      document.body.append(box);
+    }
+    box.querySelector('pre').textContent += text + '\n';
+  };
+  addEventListener('error', (e) => { if (e.message && !/ResizeObserver/.test(e.message)) AK.reportError('スクリプト', e.error || e.message); });
+  addEventListener('unhandledrejection', (e) => AK.reportError('処理', e.reason));
+
   AK.confirm = (msg, onYes) => AK.modal({ body: msg, buttons: [{ label: 'やめる' }, { label: 'OK', cls: 'primary', onClick: onYes }] });
 })(window.AK);

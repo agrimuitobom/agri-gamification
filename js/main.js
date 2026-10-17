@@ -171,7 +171,9 @@
       navigator.serviceWorker.register('sw.js').catch(() => { /* オフライン対応は任意 */ });
     }
     document.addEventListener('pointerdown', () => AK.Sound.ensure(), { once: true });
-    AK.Cloud.start(startGame);
+    AK.Cloud.start(() => {
+      try { startGame(); } catch (e) { AK.reportError('起動', e); }
+    });
   }
 
   function startGame() {

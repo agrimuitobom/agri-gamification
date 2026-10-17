@@ -49,6 +49,11 @@
           if (await afterLogin(res.user)) { root.className = ''; onReady(); }
           else showLogin(onReady, msg.textContent);
         } catch (e) {
+          if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+            msg.textContent = 'ログインページに移動します…';
+            Cloud.auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+            return;
+          }
           btn.disabled = false;
           msg.textContent = e.code === 'auth/popup-closed-by-user' ? '' : 'ログインできませんでした（' + (e.code || e.message) + '）';
         }
@@ -75,8 +80,26 @@
       if (m) m.textContent = `@${AK.ALLOWED_DOMAIN} のアカウントでログインしてください`;
       return false;
     }
-    document.getElementById('login-root').className = '';
-    await sync(user);
+    // 読み込み中の表示（真っ白にならないように）。10秒たっても終わらなければ端末のデータで始められる
+    const root = document.getElementById('login-root');
+    root.className = 'open';
+    root.innerHTML = '';
+    let skip;
+    const skipped = new Promise((res) => { skip = res; });
+    const later = h('div', { class: 'hidden' },
+      h('p', { class: 'small' }, '通信に時間がかかっています…'),
+      h('button', { class: 'btn small', onclick: () => skip('skip') }, 'この端末のデータで始める'));
+    root.append(h('div', { class: 'login-box' },
+      h('div', { class: 'login-logo' }, '☁️'),
+      h('p', {}, `${user.displayName || user.email} さん`),
+      h('p', { class: 'small' }, 'セーブデータを読み込み中…'),
+      later));
+    const timer = setTimeout(() => later.classList.remove('hidden'), 10000);
+    const r = await Promise.race([sync(user).then(() => 'ok', (e) => { AK.reportError('同期', e); return 'error'; }), skipped]);
+    clearTimeout(timer);
+    if (r === 'skip') { if (AK.S.uid && AK.S.uid !== user.uid) AK.setState(null); AK.S.uid = user.uid; AK.save(); }
+    root.className = '';
+    root.innerHTML = '';
     setInterval(() => Cloud.push(), PUSH_INTERVAL);
     document.addEventListener('visibilitychange', () => { if (document.hidden) Cloud.push(); });
     addEventListener('pagehide', () => Cloud.push());
@@ -96,8 +119,10 @@
       }
       AK.S.uid = user.uid;
       AK.save();
-      await Cloud.push(true);
+      await withTimeout(Cloud.push(true, true), 8000);
     } catch (e) {
+      console.warn('[cloud] sync failed', e);
+      if (e && e.code === 'permission-denied') AK.reportError('クラウド読み込み（権限）', e);
       // オフラインなど：この端末のデータで続ける（次回つながったときに保存）
       if (local.uid && local.uid !== user.uid) AK.setState(null);
       AK.S.uid = user.uid;
@@ -126,24 +151,29 @@
   }
 
   /** クラウドに保存（変化があったときだけ書き込む） */
-  Cloud.push = async function (force) {
+  Cloud.push = async function (force, throwErrors) {
     if (!Cloud.user || !Cloud.db) return;
     const S = AK.S, uid = Cloud.user.uid;
     const save = JSON.stringify(S);
     const rank = S.classId ? JSON.stringify(rankData()) : '';
     if (!force && save === Cloud.lastSave) return;
-    const ts = firebase.firestore.FieldValue.serverTimestamp();
-    const batch = Cloud.db.batch();
-    batch.set(Cloud.db.collection('users').doc(uid), {
-      save, stats: summary(), name: S.name, classId: S.classId,
-      email: Cloud.user.email || '', realName: Cloud.user.displayName || '', updatedAt: ts,
-    }, { merge: true });
-    if (rank && (force || rank !== Cloud.lastRank)) batch.set(Cloud.db.collection('ranks').doc(uid), Object.assign(rankData(), { updatedAt: ts }));
     try {
+      const ts = firebase.firestore.FieldValue.serverTimestamp();
+      const batch = Cloud.db.batch();
+      batch.set(Cloud.db.collection('users').doc(uid), {
+        save, stats: summary(), name: S.name, classId: S.classId,
+        email: Cloud.user.email || '', realName: Cloud.user.displayName || '', updatedAt: ts,
+      }, { merge: true });
+      if (rank && (force || rank !== Cloud.lastRank)) batch.set(Cloud.db.collection('ranks').doc(uid), Object.assign(rankData(), { updatedAt: ts }));
       await batch.commit();
       Cloud.lastSave = save;
       if (rank) Cloud.lastRank = rank;
-    } catch (e) { /* オフライン：次回に再送 */ }
+    } catch (e) {
+      // オフラインなど：次回に再送
+      console.warn('[cloud] push failed', e);
+      if (e && e.code === 'permission-denied' && !Cloud.warned) { Cloud.warned = true; AK.reportError('クラウド保存（権限）', e); }
+      if (throwErrors) throw e;
+    }
   };
 
   Cloud.joinClass = async function (code) {
