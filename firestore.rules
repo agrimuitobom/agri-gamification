@@ -1,0 +1,43 @@
+rules_version = '2';
+// アグリキングダム用 Firestore セキュリティルール
+// Firebase コンソール → Firestore Database → ルール に貼り付けて「公開」してください。
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ★ 先生のメールアドレス（js/firebase-config.js の TEACHER_EMAILS と同じものを書く）
+    function isTeacher() {
+      return request.auth != null && request.auth.token.email in [
+        'sensei@example.ed.jp'
+      ];
+    }
+
+    function signedIn() { return request.auth != null; }
+    function myClass() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.classId;
+    }
+    function isTeacherOf(classId) {
+      return signedIn() && classId is string && classId != ''
+        && exists(/databases/$(database)/documents/classes/$(classId))
+        && get(/databases/$(database)/documents/classes/$(classId)).data.teacherUid == request.auth.uid;
+    }
+
+    // 生徒の保存データ：本人は読み書き、担当の先生は読むだけ
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isTeacherOf(resource.data.classId));
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // ランキング用の公開情報：同じクラスの人と担当の先生が読める
+    match /ranks/{uid} {
+      allow read: if signedIn() && (resource.data.classId == myClass() || isTeacherOf(resource.data.classId));
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // クラス：ログインしていればコードで参照可、作成は先生のみ
+    match /classes/{code} {
+      allow read: if signedIn();
+      allow create: if isTeacher() && request.resource.data.teacherUid == request.auth.uid;
+      allow update, delete: if isTeacher() && resource.data.teacherUid == request.auth.uid;
+    }
+  }
+}

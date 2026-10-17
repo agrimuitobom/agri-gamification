@@ -489,3 +489,31 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .flash.red { background: radial-gradient(circle, transparent 30%, rgba(239, 68, 68, .7)); }
 @keyframes bossHit { 0% { transform: translateX(0); filter: brightness(3); } 25% { transform: translateX(-10px) rotate(-10deg); } 50% { transform: translateX(10px) rotate(10deg); } 100% { transform: none; filter: none; } }
 @keyframes bossGlow { from { box-shadow: 0 4px 0 #3b0764, 0 0 10px rgba(239, 68, 68, .3); } to { box-shadow: 0 4px 0 #3b0764, 0 0 26px rgba(239, 68, 68, .8); } }
+
+/* ============ ログイン・ランキング ============ */
+#login-root { position: fixed; inset: 0; z-index: 90; display: none; place-items: center; padding: 16px;
+  background: linear-gradient(#bfe9ff, #e8f8e0 60%); }
+#login-root.open { display: grid; }
+.login-box { background: #fff; border-radius: 24px; padding: 28px 24px; max-width: 380px; width: 100%; text-align: center; box-shadow: var(--shadow); }
+.login-box h1 { margin: 6px 0; color: var(--green-d); }
+.login-logo { font-size: 72px; animation: bob 1.5s infinite; }
+.google-btn {
+  display: inline-flex; align-items: center; gap: 10px; margin: 14px 0 6px; padding: 12px 22px; border-radius: 12px;
+  border: 2px solid #dadce0; background: #fff; font-size: 16px; font-weight: 800; box-shadow: 0 3px 0 #dadce0;
+}
+.google-btn .g { font-weight: 800; font-size: 20px; color: #4285f4; }
+.login-msg { color: var(--red); font-size: 13px; min-height: 1.4em; }
+.install-btn { margin-top: 10px; }
+.code-input { text-transform: uppercase; letter-spacing: 6px; text-align: center; font-size: 24px; }
+.rank-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 12px; }
+.rank-row { display: flex; align-items: center; gap: 10px; background: #f9fafb; border-radius: 12px; padding: 8px 12px; }
+.rank-row.top1 { background: linear-gradient(135deg, #fff8d6, #ffe08a); }
+.rank-row.top2 { background: linear-gradient(135deg, #f8fafc, #e2e8f0); }
+.rank-row.top3 { background: linear-gradient(135deg, #fff7ed, #fed7aa); }
+.rank-row.me { box-shadow: 0 0 0 3px var(--green); }
+.rk { width: 34px; text-align: center; font-weight: 800; font-size: 20px; color: var(--sub); }
+.rn { flex: 1; min-width: 0; }
+.rn b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rn small { color: var(--sub); font-size: 11px; }
+.rv { font-weight: 800; font-size: 18px; color: var(--green-d); white-space: nowrap; }
+a.btn { text-decoration: none; display: inline-block; }

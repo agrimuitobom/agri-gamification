@@ -240,6 +240,9 @@
 
     S.stats.answered++;
     S.stats.byField[q.f].a++;
+    const ql = S.qlog[q.id] || (S.qlog[q.id] = [0, 0]);
+    ql[0]++;
+    if (!ok) ql[1]++;
     s.results.push({ q, ok, chosen: c ? c.t : '（時間切れ）' });
     const at = c ? AK.centerOf(c.el) : { x: innerWidth / 2, y: innerHeight / 2 };
 

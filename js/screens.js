@@ -224,7 +224,75 @@
         h('button', { class: 'btn small danger', onclick: () => AK.confirm('本当にすべてのデータを消しますか？<br>この操作は元に戻せません。', AK.resetAll) }, '🗑️ データ削除')),
       h('p', { class: 'small' }, `問題数：${AK.QUESTIONS.length}問｜データはこの端末のブラウザに保存されます。`));
 
-    v.append(h('div', { class: 'screen' }, profile, fieldBars, ach, settings));
+    let account = null;
+    if (AK.Cloud.enabled && AK.Cloud.user) {
+      const u = AK.Cloud.user;
+      account = h('div', { class: 'panel' }, h('h3', {}, '☁️ アカウント'),
+        h('p', { class: 'small' }, `${u.displayName || ''}（${u.email}）でログイン中。データはクラウドに自動保存されます。`),
+        h('p', {}, '🏫 クラス：', h('b', {}, S.classId ? `${S.className}（${S.classId}）` : '未参加')),
+        h('div', { class: 'set-row' },
+          h('button', { class: 'btn small', onclick: () => AK.classDialog(() => AK.refresh()) }, S.classId ? '🏫 クラスを変更' : '🏫 クラスに参加'),
+          h('button', { class: 'btn small', onclick: () => AK.Cloud.push(true).then(() => AK.toast('☁️ 保存しました')) }, '☁️ 今すぐ保存'),
+          AK.Cloud.isTeacher() ? h('a', { class: 'btn small primary', href: 'teacher.html' }, '👨‍🏫 先生用ページ') : null,
+          h('button', { class: 'btn small danger', onclick: () => AK.confirm('ログアウトしますか？', () => { AK.Cloud.signOut(); }) }, '🚪 ログアウト')));
+    }
+    const install = AK.canInstall() ? h('div', { class: 'panel' }, h('h3', {}, '📲 アプリとして使う'),
+      h('p', { class: 'small' }, 'インストールすると、デスクトップやスタートメニューから全画面ですぐ起動できます。'),
+      AK.installButton()) : null;
+
+    v.append(h('div', { class: 'screen' }, profile, account, install, fieldBars, ach, settings));
+  };
+
+  // ---------- ランキング ----------
+  const RANK_KINDS = [
+    { id: 'week', label: '今週の正解', unit: '問', val: (r) => (r.weekKey === AK.weekKey() ? r.weekCorrect : 0) },
+    { id: 'correct', label: '累計正解', unit: '問', val: (r) => r.correct },
+    { id: 'kantei', label: '鑑定競技', unit: '/20', val: (r) => r.kantei },
+    { id: 'level', label: 'レベル', unit: '', pre: 'Lv.', val: (r) => r.level },
+    { id: 'dex', label: '図鑑', unit: '種', val: (r) => r.dex },
+    { id: 'boss', label: 'ボス討伐', unit: '回', val: (r) => r.bossWins || 0 },
+  ];
+  let rankKind = 'week', rankCache = null;
+  Screens.rank = function (v) {
+    const S = AK.S;
+    v.innerHTML = '';
+    const wrap = h('div', { class: 'screen' });
+    v.append(wrap);
+    if (!S.classId) {
+      wrap.append(h('div', { class: 'panel empty' },
+        h('div', { class: 'big' }, '🏫'),
+        h('p', {}, 'クラスに参加すると、クラスのランキングが見られるよ！'),
+        h('button', { class: 'btn primary', onclick: () => AK.classDialog(() => { rankCache = null; AK.refresh(); }) }, 'クラスコードを入力')));
+      return;
+    }
+    const kind = RANK_KINDS.find((k) => k.id === rankKind);
+    const list = h('div', { class: 'rank-list' }, h('div', { class: 'small center' }, '読み込み中…'));
+    wrap.append(h('div', { class: 'panel' },
+      h('h3', {}, `🥇 ${S.className} ランキング`),
+      h('div', { class: 'tabs' }, RANK_KINDS.map((k) => h('button', {
+        class: 'tab' + (k.id === rankKind ? ' on' : ''),
+        onclick: () => { rankKind = k.id; AK.Sound.play('tap'); Screens.rank(v); },
+      }, k.label))),
+      list,
+      h('div', { class: 'center' }, h('button', { class: 'btn small', onclick: () => { rankCache = null; Screens.rank(v); } }, '🔄 更新'))));
+
+    const draw = (rows) => {
+      list.innerHTML = '';
+      const sorted = rows.map((r) => Object.assign({ v: kind.val(r) || 0 }, r)).sort((a, b) => b.v - a.v);
+      let rank = 0, prev = null;
+      sorted.forEach((r, i) => {
+        if (r.v !== prev) { rank = i + 1; prev = r.v; }
+        const me = r.uid === (AK.Cloud.user && AK.Cloud.user.uid);
+        list.append(h('div', { class: 'rank-row' + (me ? ' me' : '') + (rank <= 3 ? ' top' + rank : '') },
+          h('div', { class: 'rk' }, rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : String(rank)),
+          h('div', { class: 'rn' }, h('b', {}, r.name + (me ? '（あなた）' : '')), h('small', {}, `Lv.${r.level} ${r.title || ''}`)),
+          h('div', { class: 'rv' }, `${kind.pre || ''}${r.v}${kind.unit}`)));
+      });
+      if (!sorted.length) list.append(h('div', { class: 'small center' }, 'まだだれもいません'));
+    };
+    if (rankCache && Date.now() - rankCache.t < 60000) { draw(rankCache.rows); return; }
+    AK.Cloud.fetchRanking().then((rows) => { rankCache = { t: Date.now(), rows }; draw(rows); },
+      () => { list.innerHTML = '<div class="small center">ランキングを読み込めませんでした（オフライン？）</div>'; });
   };
   const stat = (label, val) => h('div', { class: 'pf-stat' }, h('b', {}, String(val)), h('span', {}, label));
 

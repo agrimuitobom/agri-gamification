@@ -53,7 +53,7 @@ window.AK = window.AK || {};
 
   // ---------- セーブデータ ----------
   const KEY = 'agriKingdom.save.v1';
-  const MAP_KEYS = ['inv', 'tiles', 'dex', 'ach'];
+  const MAP_KEYS = ['inv', 'tiles', 'dex', 'ach', 'qlog'];
 
   AK.defaultState = () => ({
     v: 1,
@@ -75,6 +75,12 @@ window.AK = window.AK || {};
     daily: { date: '', missions: [], streak: 0 },
     best: { kantei: 0 },
     boss: { date: '', won: false, wins: 0 },
+    weekly: { key: '', correct: 0 },
+    qlog: {}, // 問題ごとの [解答数, 不正解数]（先生用ダッシュボードで使う）
+    uid: '', // クラウド利用時のユーザーID
+    classId: '',
+    className: '',
+    savedAt: 0,
     settings: { sound: true },
   });
 
@@ -85,18 +91,23 @@ window.AK = window.AK || {};
     return out;
   }
 
+  /** 保存データを現在のバージョンの形にそろえて読み込む */
+  AK.setState = function (s) {
+    const st = merge(AK.defaultState(), s);
+    // マップ型のデータはデフォルトとマージせずそのまま使う（家を動かした場合など）
+    if (s) MAP_KEYS.forEach((k) => { if (s[k]) st[k] = s[k]; });
+    AK.S = st;
+  };
   AK.load = function () {
     let s = null;
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) s = JSON.parse(raw);
     } catch (e) { /* 壊れたデータは無視 */ }
-    const st = merge(AK.defaultState(), s);
-    // マップ型のデータはデフォルトとマージせずそのまま使う（家を動かした場合など）
-    if (s) MAP_KEYS.forEach((k) => { if (s[k]) st[k] = s[k]; });
-    AK.S = st;
+    AK.setState(s);
   };
   AK.save = function () {
+    AK.S.savedAt = Date.now();
     try { localStorage.setItem(KEY, JSON.stringify(AK.S)); } catch (e) { /* 容量不足など */ }
   };
   AK.resetAll = function () {
@@ -246,8 +257,20 @@ window.AK = window.AK || {};
   };
 
   /** ゲーム内の出来事を記録（ミッション進行・実績チェック） */
+  /** 週の始まり（月曜）の日付。ランキングの「今週」に使う */
+  AK.weekKey = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
   AK.track = function (ev, val = 1) {
     const S = AK.S;
+    if (ev === 'correct') {
+      const wk = AK.weekKey();
+      if (S.weekly.key !== wk) S.weekly = { key: wk, correct: 0 };
+      S.weekly.correct += val;
+    }
     for (const m of S.daily.missions) {
       const def = AK.missionDef(m.id);
       if (!def || def.ev !== ev || m.claimed) continue;

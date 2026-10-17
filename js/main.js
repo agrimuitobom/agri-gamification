@@ -9,6 +9,7 @@
     { id: 'quiz', icon: '📝', label: '鑑定' },
     { id: 'bag', icon: '🎒', label: '倉庫' },
     { id: 'dex', icon: '📖', label: '図鑑' },
+    { id: 'rank', icon: '🥇', label: 'ランク', cloud: true },
     { id: 'rec', icon: '🏆', label: '記録' },
   ];
   const SCREENS = {
@@ -16,6 +17,7 @@
     quiz: (v) => AK.Screens.quiz(v),
     bag: (v) => AK.Screens.bag(v),
     dex: (v) => AK.Screens.dex(v),
+    rank: (v) => AK.Screens.rank(v),
     rec: (v) => AK.Screens.rec(v),
   };
   let current = 'farm';
@@ -51,7 +53,7 @@
     const ready = AK.Farm.readyCount();
     const missions = AK.S.daily.missions.filter((m) => { const d = AK.missionDef(m.id); return d && !m.claimed && m.prog >= d.goal; }).length;
     const badge = { farm: ready, quiz: missions + (AK.bossToday().won ? 0 : 1) };
-    TABS.forEach((t) => nav.append(h('button', {
+    TABS.filter((t) => !t.cloud || AK.Cloud.enabled).forEach((t) => nav.append(h('button', {
       class: 'tabbtn' + (current === t.id ? ' on' : ''),
       onclick: () => { AK.Sound.play('tap'); AK.go(t.id); },
     },
@@ -66,6 +68,7 @@
       ['🌱', '王国に植えて育てよう', '「王国」タブで、下のアイテムを選んでマスをタップ。<br>時間がたつと育って✨収穫できる！<br>果樹は何度でも収穫できるぞ。<br><b>🐛病害虫</b>が出たら、問題に正解して撃退しよう。'],
       ['🗺️', '領土を広げて王国を大きく', '収穫でコインとXPがたまる。<br>コインを集めて<b>昇格試験</b>に合格すると、領土が広がる！<br>施設は周りのマスに効果があるので、配置を工夫しよう。'],
       ['⚔️', 'ボス・旬・競技', '毎日<b>ボス</b>が襲来！正解で攻撃、まちがえるとハートが減る。<br><b>🗓️旬</b>の作物は成長もコインも1.5倍。いまの季節に合う作物を植えよう！'],
+      ...(AK.Cloud.enabled ? [['🥇', 'クラスで競おう', 'クラスコードを入力すると、<b>クラスランキング</b>に参加できる。<br>今週の正解数・鑑定競技ベスト・レベルなどで競争だ！<br>データはクラウドに保存されるので、どのPCからでも続きができるよ。']] : []),
       ['🏅', 'もっとやりこむ', '<b>鑑定競技モード</b>：本番形式の20問タイムアタック<br><b>復習ノート</b>：間違えた問題を克服するとボーナス<br><b>デイリーミッション</b>・<b>図鑑</b>・<b>実績</b>もコンプリートを目指そう！'],
     ];
     let i = 0;
@@ -80,7 +83,7 @@
           h('div', { class: 'dots' }, slides.map((_, j) => h('span', { class: j === i ? 'on' : '' })))),
         buttons: i < slides.length - 1
           ? [{ label: 'とじる' }, { label: '次へ ▶', cls: 'primary', onClick: () => { i++; setTimeout(show, 0); } }]
-          : [{ label: 'はじめる！', cls: 'primary' }],
+          : [{ label: 'はじめる！', cls: 'primary', onClick: () => { if (AK.Cloud.enabled && !AK.S.classId) setTimeout(() => AK.classDialog(() => AK.refresh()), 300); } }],
       });
     };
     show();
@@ -104,6 +107,7 @@
           renderTop();
           AK.refresh();
           setTimeout(AK.showHelp, 250);
+          AK.Cloud.push(true);
         },
       }],
     });
@@ -146,9 +150,31 @@
     setTimeout(() => AK.showDrops(box, drops, `+${coins} 💰`), 300);
   }
 
+  // ---------- PWA：インストールボタン ----------
+  let installEvent = null;
+  addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvent = e; });
+  addEventListener('appinstalled', () => { installEvent = null; AK.toast('📲 インストールしました！デスクトップやスタートメニューから起動できます'); });
+  AK.canInstall = () => !!installEvent;
+  AK.install = async () => {
+    if (!installEvent) return;
+    installEvent.prompt();
+    await installEvent.userChoice;
+    installEvent = null;
+    if (AK.refresh) AK.refresh();
+  };
+  AK.installButton = () => (installEvent ? h('button', { class: 'btn small install-btn', onclick: AK.install }, '📲 アプリとしてインストール') : null);
+
   function init() {
     AK.load();
     AK.FX.init();
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      navigator.serviceWorker.register('sw.js').catch(() => { /* オフライン対応は任意 */ });
+    }
+    document.addEventListener('pointerdown', () => AK.Sound.ensure(), { once: true });
+    AK.Cloud.start(startGame);
+  }
+
+  function startGame() {
     AK.Farm.update();
     const daily = AK.ensureDaily();
     renderTop();
@@ -173,13 +199,12 @@
     }, 1000);
     addEventListener('pagehide', AK.save);
     document.addEventListener('visibilitychange', () => { if (document.hidden) AK.save(); });
-    document.addEventListener('pointerdown', () => AK.Sound.ensure(), { once: true });
 
-    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-      navigator.serviceWorker.register('sw.js').catch(() => { /* オフライン対応は任意 */ });
-    }
     if (!AK.S.name) firstRun();
-    else if (daily.newDay) loginBonus(daily);
+    else {
+      if (daily.newDay) loginBonus(daily);
+      if (AK.Cloud.enabled && !AK.S.classId) setTimeout(() => AK.classDialog(() => AK.refresh()), daily.newDay ? 600 : 300);
+    }
   }
 
   document.addEventListener('DOMContentLoaded', init);

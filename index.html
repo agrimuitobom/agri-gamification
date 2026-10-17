@@ -20,11 +20,17 @@
     <main id="view"></main>
     <nav id="tabbar"></nav>
   </div>
+  <div id="login-root"></div>
   <div id="quiz-root"></div>
   <div id="modal-root"></div>
   <div id="toast-root"></div>
   <canvas id="fx"></canvas>
 
+  <!-- Firebase（未設定・オフライン時は読み込めなくてもローカル保存で動く） -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
   <!-- データ（教員が編集しやすいよう分離） -->
   <script src="js/data/questions.js"></script>
   <script src="js/data/items.js"></script>
@@ -34,6 +40,7 @@
   <script src="js/quiz.js"></script>
   <script src="js/farm.js"></script>
   <script src="js/screens.js"></script>
+  <script src="js/cloud.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

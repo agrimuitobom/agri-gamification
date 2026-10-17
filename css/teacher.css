@@ -1,0 +1,46 @@
+:root { --green: #4caf50; --green-d: #2e7d32; --ink: #1f2937; --sub: #6b7280; --line: #e5e7eb; }
+* { box-sizing: border-box; }
+body {
+  margin: 0; color: var(--ink); background: #f3f7f0;
+  font-family: 'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', 'Meiryo', sans-serif;
+}
+.t-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 12px 20px; background: linear-gradient(#5cc160, #3f9f43); color: #fff;
+}
+.t-logo { font-weight: 800; font-size: 20px; }
+.t-logo span { font-size: 13px; opacity: .9; margin-left: 8px; }
+#t-user { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+main { max-width: 1280px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+#t-class { display: flex; flex-direction: column; gap: 14px; }
+.t-panel { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, .06); }
+.t-panel h2, .t-panel h3 { margin: 0 0 8px; }
+.t-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.t-row h2, .t-row h3 { margin: 0; }
+.center { text-align: center; }
+.small { font-size: 12px; color: var(--sub); }
+.t-btn {
+  font: inherit; font-size: 13px; font-weight: 800; border: 1px solid var(--line); background: #fff; color: var(--ink);
+  border-radius: 8px; padding: 6px 12px; cursor: pointer; text-decoration: none; display: inline-block;
+}
+.t-btn:hover { background: #f9fafb; }
+.t-btn.primary { background: var(--green); color: #fff; border-color: var(--green); }
+.t-btn.big { font-size: 16px; padding: 10px 24px; }
+.t-select { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); min-width: 240px; }
+.t-code { margin-top: 10px; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+.t-code b { font-size: 28px; letter-spacing: 4px; color: var(--green-d); background: #ecfdf5; padding: 2px 14px; border-radius: 8px; }
+.t-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+.t-card { background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 2px 8px rgba(0, 0, 0, .06); }
+.t-card small { display: block; color: var(--sub); font-size: 12px; }
+.t-card b { font-size: 26px; }
+.t-fbar { display: grid; grid-template-columns: 90px 1fr 120px; gap: 10px; align-items: center; margin: 6px 0; font-size: 14px; font-weight: 800; }
+.t-bar { height: 14px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.t-bar i { display: block; height: 100%; border-radius: 99px; }
+.t-table-wrap { overflow-x: auto; margin-top: 10px; }
+.t-table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.t-table th, .t-table td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left; white-space: nowrap; }
+.t-table th { background: #f9fafb; cursor: pointer; user-select: none; position: sticky; top: 0; }
+.t-table tbody tr:hover { background: #f9fafb; }
+.t-table td.low { color: #b91c1c; font-weight: 800; background: #fef2f2; }
+.t-table td.high { color: #047857; font-weight: 800; }
+.t-table td.q { white-space: normal; min-width: 320px; }

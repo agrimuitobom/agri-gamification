@@ -30,6 +30,16 @@ GitHub Pages など http(s) で公開した場合は、オフラインでも動�
 
 セーブデータは各端末のブラウザ（localStorage）に保存されます。端末を変えるときは「記録 → データ引き継ぎ」のコードを使います。
 
+## クラウド保存・クラスランキング・先生用ダッシュボード（Firebase）
+
+`js/firebase-config.js` に Firebase の設定を書くと、次の機能が使えるようになります（未設定ならこの端末だけに保存）。
+
+- **Googleログイン＋クラウドセーブ**：どのPCからでも続きができる
+- **クラスランキング**：クラスコードで参加。今週の正解数・累計正解・鑑定競技・レベル・図鑑・ボス討伐
+- **先生用ダッシュボード**（`teacher.html`）：クラス作成、生徒ごとの解答数・分野別正答率・苦手分野、つまずきが多い問題TOP15、CSV出力
+
+設定手順は **[docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md)** を参照してください。
+
 ## 問題の追加・修正（先生向け）
 
 `js/data/questions.js` を編集します。
@@ -56,6 +66,10 @@ js/effects.js       効果音・紙吹雪・モーダルなどの演出
 js/quiz.js          クイズ（修行・復習・鑑定競技・昇格試験・病害虫）
 js/farm.js          王国（配置・成長・収穫・領土拡張）
 js/screens.js       鑑定メニュー・倉庫・図鑑・記録
-js/main.js          起動・画面切り替え
-sw.js / manifest.webmanifest / icon.svg  オフライン対応（PWA）
+js/main.js          起動・画面切り替え・PWAインストール
+js/cloud.js         Firebase：ログイン・クラウドセーブ・クラス参加・ランキング
+js/firebase-config.js  Firebase の設定（先生が編集）
+teacher.html / js/teacher.js / css/teacher.css  先生用ダッシュボード
+firestore.rules     Firestore のセキュリティルール
+sw.js / manifest.webmanifest / icon-*.png  オフライン対応（PWA）
 ```
