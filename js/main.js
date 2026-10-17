@@ -129,6 +129,7 @@
 
   function levelUp(lv) {
     const prevTitle = AK.title(lv - 1), newTitle = AK.title(lv);
+    const prevHouse = AK.houseStage(lv - 1), newHouse = AK.houseStage(lv);
     const coins = lv * 10;
     AK.S.coins += coins;
     const drops = AK.rollAndGive(1, 'mix', 8);
@@ -144,6 +145,10 @@
         h('div', { class: 'lvup-text' }, 'LEVEL UP!'),
         h('div', { class: 'lvup-num' }, `Lv.${lv}`),
         prevTitle !== newTitle ? h('div', { class: 'new-title' }, `🎖️ 称号「${newTitle}」を獲得！`) : null,
+        prevHouse !== newHouse ? h('div', { class: 'house-evo' },
+          h('div', { class: 'he-row' }, h('span', { class: 'he-old' }, prevHouse.emoji), ' ▶ ', h('span', { class: 'he-new' }, newHouse.emoji)),
+          h('div', {}, `🏠 家が「${newHouse.name}」に進化した！`),
+          h('small', {}, `収穫コイン・XP +${Math.round(newHouse.bonus * 100)}%`)) : null,
         box),
       buttons: [{ label: 'やったー！', cls: 'primary big' }],
     });

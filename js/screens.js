@@ -163,11 +163,13 @@
     const got = all.filter((id) => S.dex[id]).length;
     const ids = Object.keys(AK.ITEMS).filter(inTab).sort((a, b) => RAR_ORDER[AK.ITEMS[a].rarity] - RAR_ORDER[AK.ITEMS[b].rarity]);
     const tabGot = ids.filter((id) => S.dex[id]).length;
+    const stars = all.reduce((a, id) => a + AK.stars(id), 0);
 
     v.append(h('div', { class: 'screen' },
       h('div', { class: 'panel' },
         h('h3', {}, `📖 アグリ図鑑　${got} / ${all.length}`),
         h('div', { class: 'bar big' }, h('i', { style: { width: (got / all.length * 100) + '%' } })),
+        h('div', { class: 'star-total' }, `★ ${stars} / ${all.length * 3}`, h('small', {}, '　入手で★1・10回収穫で★2・30回収穫で★3（施設・かざりは入手数1/3/5個）')),
         h('div', { class: 'tabs' }, tabs.map(([id, label]) => h('button', {
           class: 'tab' + (dexTab === id ? ' on' : ''),
           onclick: () => { dexTab = id; AK.Sound.play('tap'); Screens.dex(v); },
@@ -181,7 +183,7 @@
           },
           h('div', { class: 'ic-emoji' }, known ? i.emoji : '❓'),
           h('div', { class: 'ic-name' }, known ? i.name : '？？？'),
-          h('div', { class: 'ic-count' }, i.rarity));
+          h('div', { class: 'ic-count' }, known ? h('span', { class: 'stars' }, '★'.repeat(AK.stars(id)) + '☆'.repeat(3 - AK.stars(id))) : i.rarity));
         })))));
   };
 

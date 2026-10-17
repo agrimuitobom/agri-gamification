@@ -155,7 +155,7 @@
     }
     const i = it(t);
     if (i.type !== 'crop') {
-      const sig = 'obj' + t.id;
+      const sig = 'obj' + t.id + i.emoji;
       if (Farm.sig[k] !== sig) {
         Farm.sig[k] = sig;
         el.className = `tile obj r-${i.rarity}${i.gold ? ' gold' : ''}`;
@@ -240,6 +240,9 @@
     let xp = i.xp * castle;
     if (hasNeighbor(k, 'coin')) coin *= 1.5;
     if (AK.inSeason(t.id)) coin *= 1.5;
+    const home = Object.values(S.tiles).some((x) => x.id === 'house') ? AK.ITEMS.house.bonus || 0 : 0;
+    coin *= 1 + home;
+    xp *= 1 + home;
     if (hasNeighbor(k, 'xp')) xp *= 1.5;
     coin = Math.round(coin);
     xp = Math.round(xp);

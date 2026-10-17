@@ -97,6 +97,28 @@ window.AK = window.AK || {};
     // マップ型のデータはデフォルトとマージせずそのまま使う（家を動かした場合など）
     if (s) MAP_KEYS.forEach((k) => { if (s[k]) st[k] = s[k]; });
     AK.S = st;
+    AK.applyHouse();
+  };
+
+  // ---------- 農家の家の進化 ----------
+  AK.houseStage = (lv) => AK.HOUSE_STAGES.filter((st) => lv >= st.lv).pop();
+  /** レベルに合わせて「農家の家」アイテムの見た目・名前を更新 */
+  AK.applyHouse = function () {
+    const st = AK.houseStage(AK.S ? AK.S.level : 1), h = AK.ITEMS.house;
+    const next = AK.HOUSE_STAGES.find((x) => x.lv > st.lv);
+    h.emoji = st.emoji;
+    h.name = st.name;
+    h.desc = st.desc + (next ? `（Lv.${next.lv}で「${next.name}」に進化）` : '（最終形態）');
+    h.effectText = st.bonus ? `王国に置いておくと、収穫コイン・XP +${Math.round(st.bonus * 100)}%` : 'Lv.5で進化すると、収穫ボーナスがつく';
+    h.bonus = st.bonus;
+  };
+
+  // ---------- 図鑑の★（入手★1・収穫10回★2・収穫30回★3。施設は入手1/3/5個） ----------
+  AK.stars = function (id) {
+    const d = AK.S.dex[id], it = AK.ITEMS[id];
+    if (!d || !it) return 0;
+    if (it.type === 'crop') return d.h >= 30 ? 3 : d.h >= 10 ? 2 : 1;
+    return d.got >= 5 ? 3 : d.got >= 3 ? 2 : 1;
   };
   AK.load = function () {
     let s = null;
@@ -152,7 +174,7 @@ window.AK = window.AK || {};
       S.level++;
       up = true;
     }
-    if (up) AK.emit('levelup', S.level);
+    if (up) { AK.applyHouse(); AK.emit('levelup', S.level); }
     AK.emit('change');
   };
   AK.addCoins = function (n) {
@@ -311,6 +333,9 @@ window.AK = window.AK || {};
     { id: 'ssr', icon: '🌈', name: '伝説との出会い', desc: 'レジェンドアイテムを手に入れる', ok: (s) => Object.keys(s.dex).some((id) => AK.ITEMS[id] && AK.ITEMS[id].rarity === 'SSR') },
     { id: 'dex50', icon: '📗', name: 'コレクター', desc: '図鑑を50%うめる', ok: (s) => dexCount(s) >= dexTotal() / 2 },
     { id: 'dex100', icon: '📚', name: '完全図鑑', desc: '図鑑をすべてうめる', ok: (s) => dexCount(s) >= dexTotal() },
+    { id: 'star100', icon: '🌟', name: '図鑑マイスター', desc: '図鑑の★を100個集める', ok: (s) => Object.keys(AK.ITEMS).filter((id) => !AK.ITEMS[id].noDrop).reduce((a, id) => a + AK.stars(id), 0) >= 100 },
+    { id: 'starAll', icon: '👑', name: '★コンプリート', desc: '図鑑をすべて★3にする', ok: (s) => Object.keys(AK.ITEMS).filter((id) => !AK.ITEMS[id].noDrop).every((id) => AK.stars(id) >= 3) },
+    { id: 'castle', icon: '🏰', name: '農業王の城', desc: '農家の家を城まで進化させる（Lv.20）', ok: (s) => s.level >= 20 },
     { id: 'kanteiS', icon: '🏅', name: '鑑定競技Sランク', desc: '鑑定競技モードでSランク', ok: (s) => s.stats.kanteiS >= 1 },
     { id: 'trouble10', icon: '🛡️', name: '病害虫ハンター', desc: '病害虫トラブルを10回解決', ok: (s) => s.stats.troubles >= 10 },
     { id: 'boss1', icon: '⚔️', name: 'ボス討伐', desc: 'ボスを初めて討伐する', ok: (s) => s.boss.wins >= 1 },

@@ -538,3 +538,13 @@ img.emo {
 .tile .em img.emo { filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .25)); }
 .item-card.unknown .ic-emoji img.emo { filter: grayscale(1); }
 .tile.gold .em.tree img.emo { filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .25)); }
+
+/* ============ 図鑑の★・家の進化 ============ */
+.stars { color: #f59e0b; letter-spacing: 1px; font-size: 12px; }
+.star-total { font-weight: 800; color: #b45309; margin: -4px 0 10px; }
+.star-total small { display: block; font-weight: 500; color: var(--sub); font-size: 11px; }
+.house-evo { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-radius: 12px; padding: 8px; margin: 8px 0; font-weight: 800; color: #065f46; }
+.house-evo small { display: block; font-weight: 500; }
+.he-row { font-size: 44px; line-height: 1.2; }
+.he-old { opacity: .5; }
+.he-new { display: inline-block; animation: stamp .7s .3s cubic-bezier(.2, 1.6, .5, 1) both; }
