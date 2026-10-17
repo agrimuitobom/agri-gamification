@@ -19,6 +19,7 @@
     '🛠': 'hammer-and-wrench',
     '🔧': 'wrench',
     // オリジナルSVG（絵文字にない作物）。:名前: の形で items.js から使う
+    ':sprinkler:': 'crops/sprinkler.svg',
     ':daikon:': 'crops/daikon.svg',
     ':cabbage:': 'crops/cabbage.svg',
     ':satoimo:': 'crops/satoimo.svg',
