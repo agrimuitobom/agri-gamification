@@ -443,3 +443,49 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* ============ 旬 ============ */
+.season-bar {
+  background: #fff7ed; border: 2px solid #fdba74; border-radius: 12px; padding: 6px 10px;
+  font-size: 12px; line-height: 1.5;
+}
+.season-bar b { color: #c2410c; }
+.shun {
+  position: absolute; background: #ea580c; color: #fff; font-weight: 800; border-radius: 6px;
+  font-size: 10px; padding: 0 4px; line-height: 1.5;
+}
+.pal-item .shun { top: -6px; left: -4px; }
+.tile .shun { right: 2px; top: 2px; font-size: max(8px, .28em); }
+.tile.ready .shun { right: auto; left: 2px; }
+
+/* ============ ボス ============ */
+.boss-card {
+  display: flex; align-items: center; gap: 12px; text-align: left; border: none; border-radius: 18px; padding: 14px;
+  color: #fff; background: linear-gradient(135deg, #7f1d1d, #4c1d95); box-shadow: 0 4px 0 #3b0764, 0 0 18px rgba(239, 68, 68, .4);
+  animation: bossGlow 1.6s infinite alternate;
+}
+.boss-card.won { background: linear-gradient(135deg, #475569, #334155); box-shadow: var(--shadow); animation: none; opacity: .8; }
+.bc-emoji { font-size: 54px; animation: bob 1s infinite; }
+.bc-label { font-size: 12px; font-weight: 800; color: #fde68a; }
+.bc-name { font-size: 20px; font-weight: 800; }
+.bc-sub { font-size: 11px; opacity: .9; }
+.boss-panel {
+  display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #1f2937, #4c1d95);
+  color: #fff; border-radius: 16px; padding: 10px 14px; margin-bottom: 8px; box-shadow: var(--shadow);
+}
+.boss-emoji { font-size: 56px; line-height: 1; animation: bob 1.2s infinite; }
+.boss-emoji.hit { animation: bossHit .4s; }
+.boss-emoji.down { animation: none; transform: rotate(90deg); filter: grayscale(1); opacity: .6; transition: .5s; }
+.boss-info { flex: 1; }
+.boss-name { display: flex; justify-content: space-between; font-weight: 800; font-size: 15px; }
+.boss-name span { font-size: 12px; opacity: .85; }
+.hpbar { height: 12px; background: rgba(255, 255, 255, .2); border-radius: 99px; overflow: hidden; margin: 4px 0; }
+.hpbar i { display: block; height: 100%; background: linear-gradient(90deg, #ef4444, #f97316); transition: width .4s; }
+.hearts { font-size: 16px; letter-spacing: 2px; }
+.boss-big { font-size: 100px; margin-top: 10px; }
+.boss-big.down { transform: rotate(90deg); filter: grayscale(1); opacity: .6; }
+.float-text.dmg { color: #dc2626; font-size: 30px; }
+.float-text.crit { color: #f59e0b; font-size: 34px; text-shadow: 0 2px 0 #7c2d12, 0 0 10px #fff; }
+.flash.red { background: radial-gradient(circle, transparent 30%, rgba(239, 68, 68, .7)); }
+@keyframes bossHit { 0% { transform: translateX(0); filter: brightness(3); } 25% { transform: translateX(-10px) rotate(-10deg); } 50% { transform: translateX(10px) rotate(10deg); } 100% { transform: none; filter: none; } }
+@keyframes bossGlow { from { box-shadow: 0 4px 0 #3b0764, 0 0 10px rgba(239, 68, 68, .3); } to { box-shadow: 0 4px 0 #3b0764, 0 0 26px rgba(239, 68, 68, .8); } }

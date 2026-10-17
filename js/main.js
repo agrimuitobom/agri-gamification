@@ -50,7 +50,7 @@
     nav.innerHTML = '';
     const ready = AK.Farm.readyCount();
     const missions = AK.S.daily.missions.filter((m) => { const d = AK.missionDef(m.id); return d && !m.claimed && m.prog >= d.goal; }).length;
-    const badge = { farm: ready, quiz: missions };
+    const badge = { farm: ready, quiz: missions + (AK.bossToday().won ? 0 : 1) };
     TABS.forEach((t) => nav.append(h('button', {
       class: 'tabbtn' + (current === t.id ? ' on' : ''),
       onclick: () => { AK.Sound.play('tap'); AK.go(t.id); },
@@ -65,6 +65,7 @@
       ['📝', '問題に答えてアイテムGET', '「鑑定」タブで、野菜・草花・果樹・作物の問題に挑戦！<br>正解すると<b>種・苗・施設</b>が手に入る。<br>コンボを続けるとレアが出やすく、<b>5コンボでFEVER（報酬2倍）</b>！'],
       ['🌱', '王国に植えて育てよう', '「王国」タブで、下のアイテムを選んでマスをタップ。<br>時間がたつと育って✨収穫できる！<br>果樹は何度でも収穫できるぞ。<br><b>🐛病害虫</b>が出たら、問題に正解して撃退しよう。'],
       ['🗺️', '領土を広げて王国を大きく', '収穫でコインとXPがたまる。<br>コインを集めて<b>昇格試験</b>に合格すると、領土が広がる！<br>施設は周りのマスに効果があるので、配置を工夫しよう。'],
+      ['⚔️', 'ボス・旬・競技', '毎日<b>ボス</b>が襲来！正解で攻撃、まちがえるとハートが減る。<br><b>🗓️旬</b>の作物は成長もコインも1.5倍。いまの季節に合う作物を植えよう！'],
       ['🏅', 'もっとやりこむ', '<b>鑑定競技モード</b>：本番形式の20問タイムアタック<br><b>復習ノート</b>：間違えた問題を克服するとボーナス<br><b>デイリーミッション</b>・<b>図鑑</b>・<b>実績</b>もコンプリートを目指そう！'],
     ];
     let i = 0;
@@ -174,6 +175,9 @@
     document.addEventListener('visibilitychange', () => { if (document.hidden) AK.save(); });
     document.addEventListener('pointerdown', () => AK.Sound.ensure(), { once: true });
 
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      navigator.serviceWorker.register('sw.js').catch(() => { /* オフライン対応は任意 */ });
+    }
     if (!AK.S.name) firstRun();
     else if (daily.newDay) loginBonus(daily);
   }

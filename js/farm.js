@@ -29,7 +29,7 @@
     return i.perennial ? Math.round(i.grow * 1.5) : i.grow;
   }
   const isReady = (t) => isCrop(t) && t.bug == null && t.p >= needTime(t);
-  const speedOf = (k) => (hasNeighbor(k, 'speed') ? 1.5 : 1);
+  const speedOf = (k) => (hasNeighbor(k, 'speed') ? 1.5 : 1) * (AK.S.tiles[k] && AK.inSeason(AK.S.tiles[k].id) ? 1.5 : 1);
   Farm.expandCost = (land) => 50 + 50 * (land - 3) ** 2;
 
   Farm.readyCount = () => Object.values(AK.S.tiles).filter((t) => isReady(t) || (isCrop(t) && t.bug != null)).length;
@@ -88,7 +88,12 @@
       }
     }
     const field = h('div', { class: 'field-wrap' }, grid);
-    container.append(h('div', { class: 'farm-screen' }, head, actions, field, renderPalette()));
+    const month = new Date().getMonth() + 1;
+    const shun = Object.keys(AK.ITEMS).filter((id) => AK.inSeason(id)).map((id) => AK.ITEMS[id].name);
+    const season = h('div', { class: 'season-bar' },
+      h('b', {}, `🗓️ ${month}月の旬`), ` ${shun.join('・')}`,
+      h('span', { class: 'small' }, '（成長1.5倍・コイン1.5倍）'));
+    container.append(h('div', { class: 'farm-screen' }, head, actions, season, field, renderPalette()));
     container.querySelector('.palette').scrollLeft = palScroll;
     Farm.tick();
   };
@@ -110,7 +115,8 @@
     ids.forEach((id) => {
       const i = AK.ITEMS[id];
       bar.append(h('button', { class: `pal-item r-${i.rarity}${i.gold ? ' gold' : ''}${Farm.selected === id ? ' sel' : ''}`, onclick: sel(id) },
-        h('div', { class: 'pe' }, i.emoji), h('div', { class: 'pn' }, i.name), h('div', { class: 'pc' }, '×' + S.inv[id])));
+        h('div', { class: 'pe' }, i.emoji), h('div', { class: 'pn' }, i.name), h('div', { class: 'pc' }, '×' + S.inv[id]),
+        AK.inSeason(id) ? h('div', { class: 'shun' }, '旬') : null));
     });
     let hint;
     if (!ids.length) {
@@ -151,7 +157,8 @@
     }
     const need = needTime(t), ratio = Math.min(1, t.p / need);
     const stage = t.bug != null ? 'bug' + t.bug : ratio >= 1 ? 'ready' : ratio < 0.5 ? 's1' : 's2';
-    const sig = t.id + stage;
+    const shun = AK.inSeason(t.id);
+    const sig = t.id + stage + shun;
     if (Farm.sig[k] !== sig) {
       Farm.sig[k] = sig;
       let inner;
@@ -165,6 +172,7 @@
         inner = `<span class="em ${stage}">${sprout}</span><span class="mini">${i.emoji}</span><div class="pbar"><i></i></div>`;
         if (t.bug != null) inner += `<span class="bug">${BUGS[t.bug].e}</span><span class="alert">!</span>`;
       }
+      if (shun) inner += '<span class="shun">旬</span>';
       el.className = `tile crop ${stage === 'ready' ? 'ready' : ''} ${t.bug != null ? 'has-bug' : ''} ${i.gold ? 'gold' : ''}`;
       el.innerHTML = inner;
     }
@@ -223,6 +231,7 @@
     let coin = i.coin * castle * (1 + 0.2 * Math.min(3, countEffect('shop')));
     let xp = i.xp * castle;
     if (hasNeighbor(k, 'coin')) coin *= 1.5;
+    if (AK.inSeason(t.id)) coin *= 1.5;
     if (hasNeighbor(k, 'xp')) xp *= 1.5;
     coin = Math.round(coin);
     xp = Math.round(xp);

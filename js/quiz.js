@@ -7,7 +7,7 @@
   const LABELS = ['A', 'B', 'C', 'D'];
   const RANK_ORDER = { N: 0, R: 1, SR: 2, SSR: 3 };
   const COMBO_MILESTONES = [3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100];
-  const MODE_TITLE = { train: '修行', review: '復習ノート', kantei: '鑑定競技', exam: '昇格試験', trouble: 'トラブル発生！' };
+  const MODE_TITLE = { train: '修行', review: '復習ノート', kantei: '鑑定競技', exam: '昇格試験', trouble: 'トラブル発生！', boss: 'ボス戦' };
 
   // ---------- 出題（同じ問題が続かないよう山札方式） ----------
   const decks = {};
@@ -88,6 +88,12 @@
       total: queue ? queue.length : Infinity,
       idx: 0, correct: 0, combo: 0, maxCombo: 0, results: [],
     };
+    if (opts.mode === 'boss') {
+      const b = AK.bossToday();
+      s.field = b.field;
+      s.boss = Object.assign(b, { max: b.hp });
+      s.hearts = 3;
+    }
     root.className = 'open';
     keyHandler = onKey;
     document.addEventListener('keydown', keyHandler);
@@ -109,7 +115,7 @@
 
   function quit() {
     if (!s) return;
-    if ((s.mode === 'kantei' || s.mode === 'exam') && s.results.length) {
+    if ((s.mode === 'kantei' || s.mode === 'exam' || s.mode === 'boss') && s.results.length) {
       AK.confirm('途中でやめますか？（結果は記録されません）', close);
       return;
     }
@@ -160,9 +166,48 @@
       list.append(c.el);
     });
     s.fb = h('div', { class: 'q-feedback' });
-    const body = h('div', { class: 'q-body' }, s.comboEl, timerBar, card, list, s.fb);
+    const body = h('div', { class: 'q-body' }, s.boss ? bossPanel() : null, s.comboEl, timerBar, card, list, s.fb);
     root.append(head, body);
     if (timerBar) startTimer(timerBar.firstChild);
+  }
+
+  function bossPanel() {
+    const b = s.boss;
+    s.bossEmoji = h('div', { class: 'boss-emoji' }, b.emoji);
+    s.hpBar = h('i', { style: { width: (b.hp / b.max * 100) + '%' } });
+    s.hpText = h('span', {}, `${Math.max(0, b.hp)} / ${b.max}`);
+    s.heartEl = h('div', { class: 'hearts' }, '❤️'.repeat(s.hearts) + '🖤'.repeat(3 - s.hearts));
+    return h('div', { class: 'boss-panel' }, s.bossEmoji,
+      h('div', { class: 'boss-info' },
+        h('div', { class: 'boss-name' }, b.name, s.hpText),
+        h('div', { class: 'hpbar' }, s.hpBar),
+        s.heartEl));
+  }
+  function updateBoss() {
+    const b = s.boss;
+    s.hpBar.style.width = Math.max(0, b.hp / b.max * 100) + '%';
+    s.hpText.textContent = `${Math.max(0, b.hp)} / ${b.max}`;
+    s.heartEl.textContent = '❤️'.repeat(s.hearts) + '🖤'.repeat(3 - s.hearts);
+  }
+  function bossHit(ok) {
+    const at = AK.centerOf(s.bossEmoji);
+    if (ok) {
+      const crit = Math.random() < 0.15;
+      const dmg = (20 + Math.min(s.combo, 10) * 3) * (crit ? 2 : 1);
+      s.boss.hp -= dmg;
+      s.bossEmoji.classList.remove('hit'); void s.bossEmoji.offsetWidth; s.bossEmoji.classList.add('hit');
+      AK.floatText(crit ? `会心の一撃！ -${dmg}` : `-${dmg}`, at.x, at.y, crit ? 'crit' : 'dmg');
+      if (crit) AK.flash('');
+      if (s.boss.hp <= 0) {
+        s.bossEmoji.classList.add('down');
+        setTimeout(() => { AK.Sound.play('ssr'); AK.bigText('討伐成功！', 'legend'); AK.FX.confetti(150); }, 300);
+      }
+    } else {
+      s.hearts--;
+      AK.flash('red');
+      AK.floatText(`${s.boss.emoji}の反撃！`, innerWidth / 2, at.y + 40, 'dmg');
+    }
+    updateBoss();
   }
 
   function startTimer(bar) {
@@ -225,6 +270,7 @@
       setTimeout(() => root.classList.remove('shake'), 400);
     }
     updateCombo();
+    if (s.boss) bossHit(ok);
     afterAnswer(ok);
     AK.save();
     AK.emit('change');
@@ -256,11 +302,12 @@
       h('div', { class: 'verdict ' + (ok ? 'ok' : 'ng') }, ok ? '⭕ 正解！' : '❌ 不正解…'),
       h('div', { class: 'explain' }, h('b', {}, '💡 解説　'), q.e));
     if (ok && (s.mode === 'train' || s.mode === 'review')) giveRewards(fb);
-    if (!ok && s.mode !== 'review') fb.append(h('div', { class: 'note' }, '📕 復習ノートに追加しました'));
+    if (!ok && s.mode !== 'review' && !s.boss) fb.append(h('div', { class: 'note' }, '📕 復習ノートに追加しました'));
     if (s.mode === 'trouble' && !ok) fb.append(h('div', { class: 'note' }, '病害虫はまだ残っている…。もう一度タップして再挑戦しよう！'));
 
     let label = '次の問題 ▶';
     if (s.mode === 'trouble') label = '王国にもどる';
+    else if (s.boss) label = s.boss.hp <= 0 ? '🏆 報酬を受け取る' : s.hearts <= 0 ? '結果を見る' : '次の攻撃 ⚔️';
     else if (s.queue && s.idx >= s.total - 1) label = '結果を見る ▶';
     s.next = advance;
     fb.append(h('button', { class: 'btn primary big next-btn', onclick: () => s && s.next && s.next() }, label));
@@ -289,6 +336,7 @@
       return;
     }
     s.idx++;
+    if (s.boss && (s.boss.hp <= 0 || s.hearts <= 0)) { finishBoss(s.boss.hp <= 0); return; }
     if (s.queue && s.idx >= s.total) { finish(); return; }
     renderQ();
   }
@@ -362,6 +410,41 @@
       h('div', { class: 'res-btns' }, h('button', { class: 'btn primary big', onclick: () => { close(); if (o.onDone) o.onDone(pass); } }, pass ? '領土を広げる！' : 'もどる')),
       resultList());
     if (pass) { AK.Sound.play('levelup'); AK.FX.confetti(120); }
+  }
+
+  function finishBoss(win) {
+    const S = AK.S, b = s.boss;
+    if (!win) {
+      resultScreen(
+        h('div', { class: 'boss-big' }, b.emoji),
+        h('div', { class: 'exam-result fail' }, '😵 撤退…'),
+        h('p', { class: 'center' }, `${b.name}の残りHP：${b.hp} / ${b.max}`),
+        h('p', { class: 'center' }, '解説を読んで作戦を立て直そう。何度でも挑戦できるぞ！'),
+        h('div', { class: 'res-btns' },
+          h('button', { class: 'btn', onclick: close }, 'とじる'),
+          h('button', { class: 'btn primary', onclick: () => { const o = s.opts; close(); start(o); } }, '再挑戦！')),
+        resultList());
+      return;
+    }
+    S.boss.date = AK.today();
+    S.boss.won = true;
+    S.boss.wins++;
+    AK.track('boss');
+    const coins = 100 + 20 * Math.min(S.boss.wins, 10), xp = 60;
+    AK.addCoins(coins);
+    const drops = AK.rollAndGive(3, 'mix', 15);
+    const rewardBox = h('div', { class: 'reward' });
+    resultScreen(
+      h('div', { class: 'boss-big down' }, b.emoji),
+      h('div', { class: 'exam-result pass' }, '⚔️ 討伐成功！'),
+      h('p', { class: 'center' }, `${s.correct}問正解・残りハート ${'❤️'.repeat(s.hearts)}`),
+      h('div', { class: 'explain' }, `📖 ${b.name}：${b.desc}`),
+      rewardBox,
+      h('div', { class: 'res-btns' }, h('button', { class: 'btn primary big', onclick: close }, 'とじる')),
+      resultList());
+    AK.showDrops(rewardBox, drops, `+${xp} XP　+${coins} 💰`);
+    AK.addXP(xp);
+    AK.save();
   }
 
   function finishReview() {

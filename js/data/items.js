@@ -92,4 +92,30 @@ AK.RARITY = {
     obj('torii', 'deco', 'SR', '⛩️', '鳥居', '豊作を祈る神社の入口。秋祭りは収穫に感謝する祭り。'),
     obj('fountain', 'deco', 'SR', '⛲', '噴水', '王国の広場をいろどる噴水。'),
   ]);
+
+  // 旬（主な収穫時期・月）。現実のカレンダーで旬の作物は成長1.5倍・コイン1.5倍
+  const SEASON = {
+    tomato: [6, 7, 8, 9], cucumber: [6, 7, 8], eggplant: [6, 7, 8, 9], carrot: [4, 5, 6, 7, 11, 12],
+    broccoli: [11, 12, 1, 2, 3], pepper: [6, 7, 8, 9], strawberry: [12, 1, 2, 3, 4, 5],
+    tulip: [3, 4, 5], sunflower: [7, 8, 9], marigold: [5, 6, 7, 8, 9, 10], chrysanthemum: [9, 10, 11],
+    rose: [5, 6, 10, 11], hibiscus: [6, 7, 8, 9], sakura: [3, 4],
+    apple: [9, 10, 11, 12], mikan: [10, 11, 12, 1], grape: [8, 9, 10], pear: [8, 9, 10],
+    peach: [7, 8], kiwi: [10, 11, 12], cherry: [6, 7],
+    rice: [9, 10], corn: [6, 7, 8], potato: [6, 7, 8, 9], sweetpotato: [9, 10, 11],
+    soybean: [10, 11], peanut: [9, 10], tea: [4, 5],
+  };
+  Object.entries(SEASON).forEach(([id, m]) => { AK.ITEMS[id].season = m; });
 })();
+
+/*
+ * ボス（日替わり）。field の問題で戦う（mix は全分野）
+ */
+AK.BOSSES = [
+  { id: 'yotou', emoji: '🐛', name: 'ヨトウムシ将軍', field: 'veg', desc: '昼は土の中にかくれ、夜に出てきて野菜の葉を食い荒らすヨトウガの幼虫。' },
+  { id: 'imochi', emoji: '🦠', name: 'いもち病の魔王', field: 'crop', desc: 'イネの大敵。低温・多湿・窒素過多で大発生する糸状菌（カビ）。' },
+  { id: 'kamemushi', emoji: '🪲', name: 'カメムシ軍団長', field: 'fruit', desc: '果樹カメムシ類は果実の汁を吸い、変形果や落果の原因になる。' },
+  { id: 'hadani', emoji: '🕷️', name: 'ハダニ女王', field: 'flower', desc: '高温・乾燥で大増殖。葉の裏から汁を吸い、葉がかすり状に白くなる。' },
+  { id: 'inoshishi', emoji: '🐗', name: '暴れイノシシ', field: 'mix', desc: '鳥獣による農作物被害は全国で深刻。電気柵や防護柵で農地を守る。' },
+  { id: 'unka', emoji: '🦟', name: 'ウンカの大群', field: 'crop', desc: '梅雨どきに海外から気流に乗って飛来し、イネの株元で汁を吸う。' },
+  { id: 'shika', emoji: '🦌', name: 'シカの群れ', field: 'mix', desc: '新芽や樹皮を食べ、果樹や林業にも大きな被害を出す。' },
+];

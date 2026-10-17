@@ -1,0 +1,10 @@
+{
+  "name": "アグリキングダム",
+  "short_name": "アグリ王国",
+  "description": "農業の知識で王国を育てる学習ゲーム",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#e8f8e0",
+  "theme_color": "#4caf50",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

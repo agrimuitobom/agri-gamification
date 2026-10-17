@@ -20,6 +20,7 @@
       info.push(`⏱ 成長時間：${AK.fmtTime(i.perennial ? i.grow * 1.5 : i.grow)}${i.perennial ? `（2回目以降 ${AK.fmtTime(i.grow * 0.6)}）` : ''}`);
       info.push(`💰 収穫：${i.coin}コイン ／ ${i.xp}XP`);
       if (i.perennial) info.push('🌳 果樹は収穫しても木が残り、何度も収穫できる！');
+      if (i.season) info.push(`🗓️ 旬：${AK.fmtMonths(i.season)}${AK.inSeason(id) ? '（いまが旬！成長1.5倍・コイン1.5倍）' : ''}`);
     }
     const buttons = [{ label: 'とじる' }];
     if (opts.place && S.inv[id]) {
@@ -90,7 +91,18 @@
       h('div', {}, h('div', { class: 'wc-title' }, `復習ノート（${reviewQs.length}問）`),
         h('div', { class: 'wc-sub' }, reviewQs.length ? '間違えた問題を克服するとボーナス報酬＆レア率UP！' : '間違えた問題がここにたまります'))));
 
-    v.append(h('div', { class: 'screen' }, ms, train, challenge));
+    const b = AK.bossToday();
+    const boss = h('button', {
+      class: 'boss-card' + (b.won ? ' won' : ''), disabled: b.won,
+      onclick: () => AK.Quiz.start({ mode: 'boss', title: `⚔️ ボス戦：${b.name}` }),
+    },
+    h('div', { class: 'bc-emoji' }, b.emoji),
+    h('div', { class: 'bc-main' },
+      h('div', { class: 'bc-label' }, b.won ? '✅ 本日討伐済み！明日は新たなボスが…' : '⚠️ 今日のボスが王国に襲来！'),
+      h('div', { class: 'bc-name' }, b.name),
+      h('div', { class: 'bc-sub' }, `HP ${b.hp}｜${b.field === 'mix' ? '全分野' : AK.FIELDS[b.field].name}の問題で攻撃！ハート3つ`)));
+
+    v.append(h('div', { class: 'screen' }, boss, ms, train, challenge));
   };
 
   function claimMission(m) {

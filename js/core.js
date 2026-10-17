@@ -74,6 +74,7 @@ window.AK = window.AK || {};
     ach: {},
     daily: { date: '', missions: [], streak: 0 },
     best: { kantei: 0 },
+    boss: { date: '', won: false, wins: 0 },
     settings: { sound: true },
   });
 
@@ -148,6 +149,21 @@ window.AK = window.AK || {};
     AK.emit('change');
   };
 
+  // ---------- 旬 ----------
+  AK.inSeason = (id) => {
+    const i = AK.ITEMS[id];
+    return !!(i && i.season && i.season.includes(new Date().getMonth() + 1));
+  };
+  AK.fmtMonths = (m) => m.join('・') + '月';
+
+  // ---------- 日替わりボス ----------
+  AK.bossToday = function () {
+    const day = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000);
+    const def = AK.BOSSES[day % AK.BOSSES.length];
+    const wins = AK.S.boss.wins;
+    return Object.assign({}, def, { hp: 100 + 25 * Math.min(wins, 8), won: AK.S.boss.date === AK.today() && AK.S.boss.won });
+  };
+
   AK.TITLES = [[1, '見習い農家'], [3, '新米農家'], [5, '一人前農家'], [8, 'ベテラン農家'], [12, '農業名人'], [16, '農業博士'], [20, '農業王'], [30, '伝説の農業王']];
   AK.title = (lv) => AK.TITLES.filter(([l]) => lv >= l).pop()[1];
 
@@ -191,6 +207,7 @@ window.AK = window.AK || {};
     { id: 'review3', text: '復習ノートの問題を3問克服', goal: 3, ev: 'review' },
     { id: 'place5', text: 'アイテムを5個配置する', goal: 5, ev: 'place' },
     { id: 'trouble1', text: '病害虫トラブルを1回解決', goal: 1, ev: 'trouble' },
+    { id: 'boss1', text: '今日のボスを討伐する', goal: 1, ev: 'boss' },
   ];
   AK.missionDef = (id) => AK.MISSIONS.find((m) => m.id === id);
 
@@ -267,6 +284,8 @@ window.AK = window.AK || {};
     { id: 'dex100', icon: '📚', name: '完全図鑑', desc: '図鑑をすべてうめる', ok: (s) => dexCount(s) >= dexTotal() },
     { id: 'kanteiS', icon: '🏅', name: '鑑定競技Sランク', desc: '鑑定競技モードでSランク', ok: (s) => s.stats.kanteiS >= 1 },
     { id: 'trouble10', icon: '🛡️', name: '病害虫ハンター', desc: '病害虫トラブルを10回解決', ok: (s) => s.stats.troubles >= 10 },
+    { id: 'boss1', icon: '⚔️', name: 'ボス討伐', desc: 'ボスを初めて討伐する', ok: (s) => s.boss.wins >= 1 },
+    { id: 'boss10', icon: '🗡️', name: '王国の守護神', desc: 'ボスを10回討伐する', ok: (s) => s.boss.wins >= 10 },
     { id: 'review10', icon: '💪', name: '苦手克服', desc: '復習ノートの問題を10問克服', ok: (s) => s.stats.reviewed >= 10 },
   ];
   AK.checkAchievements = function () {
