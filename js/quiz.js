@@ -150,6 +150,7 @@
     s.answered = false;
     s.next = null;
     s.choices = AK.shuffle(q.c.map((t, i) => ({ t, ok: i === 0 })));
+    s.shownAt = Date.now();
     const F = AK.FIELDS[q.f];
 
     root.innerHTML = '';
@@ -242,6 +243,9 @@
     s.answered = true;
     clearTimer();
     const q = s.q, ok = !!(c && c.ok), S = AK.S;
+    // 連打対策：問題文を読む時間がないほど早い回答は報酬なし（修行・復習のみ）
+    s.tooFast = (s.mode === 'train' || s.mode === 'review') && Date.now() - s.shownAt < 1200;
+    if (s.mode === 'train' || s.mode === 'review') AK.pushRecent(ok && !s.tooFast);
     s.choices.forEach((x) => { x.el.disabled = true; if (x.ok) x.el.classList.add('correct'); });
     if (c && !ok) c.el.classList.add('wrong');
 
@@ -254,26 +258,29 @@
     const at = c ? AK.centerOf(c.el) : { x: innerWidth / 2, y: innerHeight / 2 };
 
     if (ok) {
-      s.correct++; s.combo++;
+      s.correct++;
+      if (!s.tooFast) s.combo++;
       s.maxCombo = Math.max(s.maxCombo, s.combo);
       S.stats.correct++;
       S.stats.byField[q.f].c++;
       S.stats.bestCombo = Math.max(S.stats.bestCombo, s.combo);
-      if (s.mode === 'review' && S.wrong.includes(q.id)) {
-        S.wrong = S.wrong.filter((id) => id !== q.id);
-        S.stats.reviewed++;
+      if (s.mode === 'review' && S.wrong.includes(q.id) && !s.tooFast) {
+        s.graduated = AK.reviewCorrect(q.id);
         AK.track('review');
       }
       AK.track('correct');
       AK.track('correct_' + q.f);
       AK.track('combo', s.combo);
       AK.Sound.play('correct', s.combo);
-      if (s.mode !== 'kantei') AK.floatText(s.mode === 'review' ? '克服！' : '正解！', at.x, at.y - 20, 'good');
+      if (s.mode !== 'kantei') {
+        const label = s.mode !== 'review' || s.tooFast ? '正解！' : s.graduated ? '🎓 卒業！' : `復習 ${AK.reviewStage(q.id)}/${AK.REVIEW_GOAL}`;
+        AK.floatText(label, at.x, at.y - 20, 'good');
+      }
       AK.FX.confetti(16 + Math.min(s.combo, 10) * 4, { x: at.x, y: at.y, spread: 8 });
       comboEffects();
     } else {
       s.combo = 0;
-      if (!S.wrong.includes(q.id)) S.wrong.push(q.id);
+      AK.reviewAdd(q.id);
       AK.Sound.play('wrong');
       root.classList.remove('fever');
       root.classList.add('shake');
@@ -311,20 +318,50 @@
     fb.append(
       h('div', { class: 'verdict ' + (ok ? 'ok' : 'ng') }, ok ? '⭕ 正解！' : '❌ 不正解…'),
       h('div', { class: 'explain' }, h('b', {}, '💡 解説　'), q.e));
-    if (ok && (s.mode === 'train' || s.mode === 'review')) giveRewards(fb);
-    if (!ok && s.mode !== 'review' && !s.boss) fb.append(h('div', { class: 'note' }, '📕 復習ノートに追加しました'));
+    if (ok && (s.mode === 'train' || s.mode === 'review')) {
+      if (s.tooFast) fb.append(h('div', { class: 'warn-box' }, '⚡ 早押しすぎ！問題文をよく読んでから答えよう（今回は報酬なし）'));
+      else giveRewards(fb);
+    }
+    if (ok && s.mode === 'review' && !s.tooFast) {
+      fb.append(h('div', { class: 'note' }, s.graduated ? '🎓 3回正解したので、この問題は復習ノートを卒業！'
+        : `📕 復習 ${AK.reviewStage(q.id)}/${AK.REVIEW_GOAL} 回目クリア。${AK.fmtWait(AK.REVIEW_WAIT[AK.reviewStage(q.id)])}後にもう一度出題されます`));
+    }
+    if (!ok && !s.boss) fb.append(h('div', { class: 'note' }, s.mode === 'review' ? '📕 復習ノートの最初（0/3）からやり直し' : '📕 復習ノートに追加しました'));
     if (s.mode === 'trouble' && !ok) fb.append(h('div', { class: 'note' }, '病害虫はまだ残っている…。もう一度タップして再挑戦しよう！'));
 
     let label = '次の問題 ▶';
     if (s.mode === 'trouble') label = '王国にもどる';
     else if (s.boss) label = s.boss.hp <= 0 ? '🏆 報酬を受け取る' : s.hearts <= 0 ? '結果を見る' : '次の攻撃 ⚔️';
     else if (s.queue && s.idx >= s.total - 1) label = '結果を見る ▶';
-    s.next = advance;
-    fb.append(h('button', { class: 'btn primary big next-btn', onclick: () => s && s.next && s.next() }, label));
+    const btn = h('button', { class: 'btn primary big next-btn', onclick: () => s && s.next && s.next() }, label);
+    fb.append(btn);
+    // 連打対策：まちがえたら解説を読む時間（3秒）は次に進めない
+    if (!ok) {
+      let left = 3;
+      btn.disabled = true;
+      btn.textContent = `解説を読もう… ${left}`;
+      const t = setInterval(() => {
+        left--;
+        if (!s || !btn.isConnected) { clearInterval(t); return; }
+        if (left > 0) { btn.textContent = `解説を読もう… ${left}`; return; }
+        clearInterval(t);
+        btn.disabled = false;
+        btn.textContent = label;
+        s.next = advance;
+      }, 1000);
+    } else s.next = advance;
     setTimeout(() => fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
   }
 
   function giveRewards(fb) {
+    // 連打対策：最近の正答率が低いときはアイテムなし・報酬ダウン
+    if (AK.lowAccuracy()) {
+      AK.addCoins(1);
+      AK.addXP(5);
+      fb.append(h('div', { class: 'warn-box' }, '🐢 最近の正答率が低いので報酬ダウン中（アイテムなし）。解説をよく読んで、正答率4割以上をめざそう！'),
+        h('div', { class: 'reward-sub' }, '+5 XP　+1 💰'));
+      return;
+    }
     const fever = s.combo >= 5;
     const xp = 10 + Math.min(s.combo, 10) * 2 + (s.mode === 'review' ? 15 : 0);
     const coins = fever ? 6 : 3;
@@ -461,7 +498,7 @@
     resultScreen(
       h('div', { class: 'exam-result pass' }, '📕 復習おつかれさま！'),
       h('div', { class: 'score' }, `${s.correct} / ${s.total} 問克服`),
-      h('p', { class: 'center' }, `復習ノートの残り：${AK.S.wrong.length}問`),
+      h('p', { class: 'center' }, `復習ノート：あと${AK.S.wrong.length}問（今すぐ復習できる問題 ${AK.reviewDue().length}問）`),
       h('div', { class: 'res-btns' }, h('button', { class: 'btn primary big', onclick: close }, 'とじる')),
       resultList());
   }

@@ -76,7 +76,9 @@
       h('p', { class: 'hint' }, '1問正解するごとにアイテムGET！コンボを続けるとレアが出やすくなり、5コンボでFEVER（報酬2倍）🔥'),
       grid);
 
-    const reviewQs = S.wrong.map(AK.qById).filter(Boolean);
+    const reviewQs = AK.reviewDue().map(AK.qById).filter(Boolean);
+    const allReview = S.wrong.filter((id) => AK.qById(id)).length;
+    const nextIn = AK.reviewNextIn();
     const challenge = h('div', { class: 'panel' },
       h('h3', {}, '⚔️ チャレンジ'),
       h('button', { class: 'wide-card kantei', onclick: () => AK.Quiz.start({ mode: 'kantei', timeLimit: 20, title: '🏅 鑑定競技モード' }) },
@@ -88,8 +90,9 @@
         onclick: () => AK.Quiz.start({ mode: 'review', queue: AK.shuffle(reviewQs).slice(0, 10), title: '📕 復習ノート' }),
       },
       h('div', { class: 'wc-icon' }, '📕'),
-      h('div', {}, h('div', { class: 'wc-title' }, `復習ノート（${reviewQs.length}問）`),
-        h('div', { class: 'wc-sub' }, reviewQs.length ? '間違えた問題を克服するとボーナス報酬＆レア率UP！' : '間違えた問題がここにたまります'))));
+      h('div', {}, h('div', { class: 'wc-title' }, `復習ノート（今すぐ ${reviewQs.length}問／全 ${allReview}問）`),
+        h('div', { class: 'wc-sub' }, reviewQs.length ? '間隔をあけて3回正解すると卒業！克服ボーナスでレア率UP'
+          : allReview ? `次の復習まで あと${AK.fmtWait(nextIn || 0)}（間隔をあけると記憶に残る！）` : '間違えた問題がここにたまります'))));
 
     const b = AK.bossToday();
     const boss = h('button', {

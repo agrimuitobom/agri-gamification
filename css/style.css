@@ -122,8 +122,9 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .kingdom-name { font-weight: 800; font-size: 18px; color: var(--green-d); text-shadow: 0 2px 0 #fff; }
 .farm-meta { font-size: 12px; color: var(--sub); font-weight: 800; }
 .farm-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.field-area { width: min(100%, max(300px, calc(100dvh - 400px))); margin: 0 auto; }
 .field-wrap {
-  width: min(100%, max(300px, calc(100dvh - 400px))); margin: 0 auto;
+  width: 100%;
   background: linear-gradient(#7cb342, #689f38);
   border-radius: 18px; padding: 8px; box-shadow: inset 0 0 0 4px #558b2f, var(--shadow);
 }
@@ -450,8 +451,8 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 
 /* ============ 旬 ============ */
 .season-bar {
-  background: #fff7ed; border: 2px solid #fdba74; border-radius: 12px; padding: 6px 10px;
-  font-size: 12px; line-height: 1.5;
+  background: rgba(255, 247, 237, .82); border: 2px solid #fdba74; border-radius: 12px; padding: 6px 10px;
+  font-size: 12px; line-height: 1.5; backdrop-filter: blur(2px);
 }
 .season-bar b { color: #c2410c; }
 .shun {
@@ -548,3 +549,76 @@ img.emo {
 .he-row { font-size: 44px; line-height: 1.2; }
 .he-old { opacity: .5; }
 .he-new { display: inline-block; animation: stamp .7s .3s cubic-bezier(.2, 1.6, .5, 1) both; }
+
+/* ============ 連打対策・復習 ============ */
+.warn-box { background: #fff7ed; border: 2px solid #fdba74; color: #9a3412; border-radius: 12px; padding: 8px 10px; font-size: 13px; font-weight: 800; text-align: center; }
+
+/* ============ 王国づくり（モーダル） ============ */
+.modal.wide { max-width: 520px; }
+.ws-coins { text-align: right; font-size: 14px; margin-bottom: 6px; }
+.ws-coins b { font-size: 18px; color: #b45309; }
+.upg-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px dashed #e5e7eb; }
+.upg-emoji { font-size: 40px; }
+.upg-main { flex: 1; min-width: 0; }
+.upg-name { font-weight: 800; }
+.upg-name .lv { background: #fef3c7; color: #92400e; border-radius: 99px; padding: 0 8px; font-size: 12px; }
+.upg-main .next { color: #047857; font-weight: 800; }
+.design-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+.design-card { border: 3px solid #e5e7eb; background: #fff; border-radius: 14px; padding: 6px; text-align: center; }
+.design-card.on { border-color: var(--green); box-shadow: 0 0 0 2px #bbf7d0; }
+.design-prev { height: 56px; border-radius: 10px; display: grid; place-items: center; font-size: 22px; overflow: hidden; letter-spacing: -2px; }
+.design-name { font-size: 12px; font-weight: 800; margin-top: 4px; }
+.design-price { font-size: 11px; color: var(--sub); font-weight: 800; }
+.prev-top, .prev-bottom, .prev-emblem { background: #f0f9ff; }
+.prev-emblem { font-size: 32px; }
+
+/* ============ 王国デザイン：空 ============ */
+.farm-screen { transition: background .4s; }
+.sky-sunset { background: linear-gradient(#ff8a5b, #ffc58f 35%, #fde7c8 70%); }
+.sky-sakura { background: radial-gradient(circle at 15% 20%, #fff 0 3px, transparent 4px), radial-gradient(circle at 70% 12%, #ffd6e7 0 4px, transparent 5px), radial-gradient(circle at 40% 40%, #ffc2d9 0 3px, transparent 4px), radial-gradient(circle at 85% 50%, #ffd6e7 0 3px, transparent 4px), linear-gradient(#ffe4ef, #fff5f8 60%); background-size: 160px 160px, 200px 200px, 140px 140px, 180px 180px, 100% 100%; animation: petals 12s linear infinite; }
+.sky-autumn { background: radial-gradient(circle at 20% 30%, #f97316 0 3px, transparent 4px), radial-gradient(circle at 70% 15%, #dc2626 0 3px, transparent 4px), radial-gradient(circle at 50% 60%, #f59e0b 0 3px, transparent 4px), linear-gradient(#fde2c4, #fef3e2 60%); background-size: 170px 170px, 210px 210px, 150px 150px, 100% 100%; animation: petals 14s linear infinite; }
+.sky-snow { background: radial-gradient(circle at 20% 20%, #fff 0 3px, transparent 4px), radial-gradient(circle at 60% 50%, #fff 0 2px, transparent 3px), radial-gradient(circle at 80% 10%, #fff 0 3px, transparent 4px), linear-gradient(#b8d6f0, #e9f3fc 60%); background-size: 120px 120px, 90px 90px, 150px 150px, 100% 100%; animation: petals 10s linear infinite; }
+.sky-night { background: radial-gradient(circle at 10% 15%, #fff 0 1.5px, transparent 2px), radial-gradient(circle at 55% 8%, #fde68a 0 2px, transparent 3px), radial-gradient(circle at 80% 30%, #fff 0 1.5px, transparent 2px), radial-gradient(circle at 30% 40%, #fff 0 1px, transparent 2px), linear-gradient(#0b1d3a, #23406b 55%, #35506b); background-size: 130px 130px, 170px 170px, 110px 110px, 90px 90px, 100% 100%; animation: twinkleBg 3s ease-in-out infinite alternate; }
+.sky-aurora { background: linear-gradient(160deg, transparent 20%, rgba(52, 211, 153, .55) 35%, transparent 50%), linear-gradient(200deg, transparent 30%, rgba(167, 139, 250, .5) 45%, transparent 60%), linear-gradient(#071a2f, #10335a 60%, #1b4a5c); background-size: 200% 100%, 200% 100%, 100% 100%; animation: aurora 8s ease-in-out infinite alternate; }
+.sky-night .kingdom-name, .sky-aurora .kingdom-name { color: #fff; text-shadow: 0 2px 6px rgba(0, 0, 0, .6); }
+.sky-night .farm-meta, .sky-aurora .farm-meta { color: #cbd5e1; }
+@keyframes petals { from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; } to { background-position: 40px 320px, -60px 400px, 30px 280px, -20px 360px, 0 0; } }
+@keyframes twinkleBg { from { filter: brightness(.9); } to { filter: brightness(1.1); } }
+@keyframes aurora { from { background-position: 0 0, 100% 0, 0 0; } to { background-position: 100% 0, 0 0, 0 0; } }
+
+/* ============ 王国デザイン：さく ============ */
+.field-wrap.fence-wood { padding: 12px; background: repeating-linear-gradient(90deg, #8d5a3b 0 14px, #a8734f 14px 16px, #8d5a3b 16px 30px); box-shadow: inset 0 0 0 3px #5d3a24, var(--shadow); }
+.field-wrap.fence-hedge { padding: 12px; background: radial-gradient(circle at 30% 30%, #4ade80 0 4px, transparent 5px), radial-gradient(circle at 70% 60%, #22c55e 0 5px, transparent 6px), #166534; background-size: 14px 14px, 18px 18px, 100% 100%; box-shadow: inset 0 0 0 3px #14532d, var(--shadow); }
+.field-wrap.fence-stone { padding: 12px; background: linear-gradient(#9ca3af 0 0) padding-box, repeating-linear-gradient(0deg, #6b7280 0 2px, transparent 2px 14px), repeating-linear-gradient(90deg, #6b7280 0 2px, #a8adb5 2px 24px); background: repeating-linear-gradient(0deg, #6b7280 0 2px, transparent 2px 14px), repeating-linear-gradient(90deg, #6b7280 0 2px, #a8adb5 2px 24px); box-shadow: inset 0 0 0 3px #4b5563, var(--shadow); }
+.field-wrap.fence-brick { padding: 12px; background: repeating-linear-gradient(0deg, #e7d3c0 0 2px, transparent 2px 12px), repeating-linear-gradient(90deg, #e7d3c0 0 2px, #b45332 2px 22px); box-shadow: inset 0 0 0 3px #7c2d12, var(--shadow); }
+.field-wrap.fence-flower { padding: 12px; background: radial-gradient(circle, #f472b6 0 3px, transparent 4px), radial-gradient(circle, #facc15 0 3px, transparent 4px), radial-gradient(circle, #fff 0 2px, transparent 3px), #4d7c0f; background-size: 16px 16px, 20px 20px, 13px 13px, 100% 100%; background-position: 0 0, 8px 6px, 4px 10px, 0 0; box-shadow: inset 0 0 0 3px #365314, var(--shadow); }
+.field-wrap.fence-gold { padding: 12px; background: linear-gradient(135deg, #b45309, #fde68a 25%, #f59e0b 50%, #fef3c7 75%, #b45309); box-shadow: inset 0 0 0 3px #92400e, 0 0 18px rgba(245, 158, 11, .6), var(--shadow); }
+
+/* ============ 王国デザイン：地面（空きマス） ============ */
+.grid.ground-deep .tile.empty { background: repeating-linear-gradient(45deg, #4caf50 0 6px, #46a34a 6px 12px); }
+.grid.ground-clover .tile.empty { background: radial-gradient(circle at 30% 30%, #86efac 0 3px, transparent 4px), radial-gradient(circle at 70% 65%, #86efac 0 3px, transparent 4px), #65a30d; background-size: 22px 22px, 26px 26px, 100% 100%; }
+.grid.ground-flowers .tile.empty { background: radial-gradient(circle, #f9a8d4 0 3px, transparent 4px), radial-gradient(circle, #fde047 0 3px, transparent 4px), radial-gradient(circle, #fff 0 2px, transparent 3px), #84cc16; background-size: 20px 20px, 24px 24px, 16px 16px, 100% 100%; background-position: 0 0, 10px 8px, 5px 13px, 0 0; }
+.grid.ground-stone .tile.empty { background: radial-gradient(circle, #e7e5e4 0 42%, transparent 45%) 0 0 / 16px 16px, radial-gradient(circle, #d6d3d1 0 40%, transparent 43%) 8px 8px / 16px 16px, #a8a29e; }
+.grid.ground-snow .tile.empty { background: radial-gradient(circle at 30% 30%, #fff 0 2px, transparent 3px), #e0f2fe; background-size: 12px 12px, 100% 100%; }
+
+/* ============ 王国デザイン：景色 ============ */
+.scenery { display: flex; justify-content: space-around; align-items: flex-end; font-size: clamp(28px, 9vw, 46px); line-height: 1; padding: 0 6px; }
+.scenery.top { margin-bottom: -6px; position: relative; z-index: 0; }
+.scenery.bottom { margin-top: 6px; }
+.scenery span { display: inline-block; animation: sway 3s ease-in-out infinite alternate; }
+.scenery span:nth-child(2n) { animation-delay: -1.5s; }
+@keyframes sway { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-3px) rotate(2deg); } }
+.prev-sky.sky-default { background: linear-gradient(#bfe9ff, #e8f8e0); }
+.prev-fence.fence-default, .prev-fence { background: linear-gradient(#7cb342, #689f38); }
+.prev-ground.ground-default, .prev-ground { background: repeating-linear-gradient(45deg, #9ccc65 0 6px, #95c45d 6px 12px); }
+.prev-fence.fence-wood { background: repeating-linear-gradient(90deg, #8d5a3b 0 14px, #a8734f 14px 16px); }
+.prev-fence.fence-hedge { background: radial-gradient(circle at 30% 30%, #4ade80 0 4px, transparent 5px), #166534; background-size: 14px 14px, 100% 100%; }
+.prev-fence.fence-stone { background: repeating-linear-gradient(0deg, #6b7280 0 2px, transparent 2px 14px), repeating-linear-gradient(90deg, #6b7280 0 2px, #a8adb5 2px 24px); }
+.prev-fence.fence-brick { background: repeating-linear-gradient(0deg, #e7d3c0 0 2px, transparent 2px 12px), repeating-linear-gradient(90deg, #e7d3c0 0 2px, #b45332 2px 22px); }
+.prev-fence.fence-flower { background: radial-gradient(circle, #f472b6 0 3px, transparent 4px), radial-gradient(circle, #facc15 0 3px, transparent 4px), #4d7c0f; background-size: 16px 16px, 20px 20px, 100% 100%; background-position: 0 0, 8px 6px, 0 0; }
+.prev-fence.fence-gold { background: linear-gradient(135deg, #b45309, #fde68a 25%, #f59e0b 50%, #fef3c7 75%, #b45309); }
+.prev-ground.ground-deep { background: repeating-linear-gradient(45deg, #4caf50 0 6px, #46a34a 6px 12px); }
+.prev-ground.ground-clover { background: radial-gradient(circle at 30% 30%, #86efac 0 3px, transparent 4px), #65a30d; background-size: 22px 22px, 100% 100%; }
+.prev-ground.ground-flowers { background: radial-gradient(circle, #f9a8d4 0 3px, transparent 4px), radial-gradient(circle, #fde047 0 3px, transparent 4px), #84cc16; background-size: 20px 20px, 24px 24px, 100% 100%; background-position: 0 0, 10px 8px, 0 0; }
+.prev-ground.ground-stone { background: radial-gradient(circle, #e7e5e4 0 42%, transparent 45%) 0 0 / 16px 16px, radial-gradient(circle, #d6d3d1 0 40%, transparent 43%) 8px 8px / 16px 16px, #a8a29e; }
+.prev-ground.ground-snow { background: radial-gradient(circle at 30% 30%, #fff 0 2px, transparent 3px), #e0f2fe; background-size: 12px 12px, 100% 100%; }

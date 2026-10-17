@@ -171,3 +171,71 @@ AK.BOSSES = [
   { id: 'unka', emoji: '🦟', name: 'ウンカの大群', field: 'crop', desc: '梅雨どきに海外から気流に乗って飛来し、イネの株元で汁を吸う。' },
   { id: 'shika', emoji: '🦌', name: 'シカの群れ', field: 'mix', desc: '新芽や樹皮を食べ、果樹や林業にも大きな被害を出す。' },
 ];
+
+/*
+ * 王国デザイン（コインで買って着せかえ）。id が '' のものは最初から持っている
+ */
+AK.DESIGN_SLOTS = [
+  { key: 'sky', name: '空', icon: '🌈' },
+  { key: 'fence', name: 'さく', icon: '🪵' },
+  { key: 'ground', name: '地面', icon: '🌱' },
+  { key: 'top', name: '奥の景色', icon: '🏔️' },
+  { key: 'bottom', name: '手前の景色', icon: '🌻' },
+  { key: 'emblem', name: '紋章', icon: '👑' },
+];
+AK.DESIGNS = {
+  sky: [
+    { id: '', name: '青空', price: 0 },
+    { id: 'sunset', name: '夕焼け', price: 300 },
+    { id: 'sakura', name: '桜の季節', price: 500 },
+    { id: 'autumn', name: '紅葉の季節', price: 500 },
+    { id: 'snow', name: '雪景色', price: 500 },
+    { id: 'night', name: '星空', price: 800 },
+    { id: 'aurora', name: 'オーロラ', price: 1500 },
+  ],
+  fence: [
+    { id: '', name: '草のふち', price: 0 },
+    { id: 'wood', name: '木のさく', price: 200 },
+    { id: 'hedge', name: '生け垣', price: 300 },
+    { id: 'stone', name: '石垣', price: 400 },
+    { id: 'brick', name: 'レンガ', price: 500 },
+    { id: 'flower', name: '花のふち', price: 600 },
+    { id: 'gold', name: '黄金のさく', price: 2000 },
+  ],
+  ground: [
+    { id: '', name: '芝生', price: 0 },
+    { id: 'deep', name: '深緑の芝生', price: 200 },
+    { id: 'clover', name: 'クローバー畑', price: 300 },
+    { id: 'flowers', name: '花畑', price: 500 },
+    { id: 'stone', name: '石だたみ', price: 500 },
+    { id: 'snow', name: '雪原', price: 400 },
+  ],
+  top: [
+    { id: '', name: 'なし', price: 0, row: '' },
+    { id: 'forest', name: '森', price: 300, row: '🌲🌳🌲🌳🌲🌳🌲' },
+    { id: 'mountain', name: '山なみ', price: 400, row: '⛰️🏔️⛰️🏔️⛰️' },
+    { id: 'festival', name: 'お祭り', price: 500, row: '🏮🎏🏮🎏🏮🎏🏮' },
+    { id: 'rainbow', name: '虹', price: 800, row: '🌈' },
+    { id: 'moon', name: 'お月見', price: 800, row: '🌙⭐🌾⭐🌾⭐' },
+  ],
+  bottom: [
+    { id: '', name: 'なし', price: 0, row: '' },
+    { id: 'sunflower', name: 'ヒマワリ畑', price: 300, row: '🌻🌻🌻🌻🌻🌻🌻' },
+    { id: 'river', name: '小川', price: 400, row: '🌊🌊🌊🌊🌊🌊🌊' },
+    { id: 'pasture', name: '牧場', price: 500, row: '🐄🐑🐔🐑🐄🐔🐑' },
+    { id: 'tulip', name: 'チューリップ花壇', price: 500, row: '🌷🌷🌷🌷🌷🌷🌷' },
+    { id: 'butterfly', name: 'ちょうちょ', price: 600, row: '🦋🌼🦋🌼🦋🌼🦋' },
+  ],
+  emblem: [
+    { id: '', name: 'お城', price: 0, mark: '🏰' },
+    { id: 'rice', name: '稲穂', price: 100, mark: '🌾' },
+    { id: 'tomato', name: 'トマト', price: 100, mark: '🍅' },
+    { id: 'apple', name: 'リンゴ', price: 100, mark: '🍎' },
+    { id: 'tulip', name: 'チューリップ', price: 100, mark: '🌷' },
+    { id: 'bread', name: 'パン', price: 100, mark: '🍞' },
+    { id: 'cow', name: 'ウシ', price: 200, mark: '🐄' },
+    { id: 'tractor', name: 'トラクター', price: 200, mark: '🚜' },
+    { id: 'star', name: '星', price: 300, mark: '⭐' },
+    { id: 'crown', name: '王冠', price: 1000, mark: '👑' },
+  ],
+};

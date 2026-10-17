@@ -8,6 +8,16 @@
 (function (AK) {
   'use strict';
   AK.EMOJI_MAP = {
+    '🏔': 'snow-capped-mountain',
+    '⛰': 'mountain',
+    '🌊': 'water-wave',
+    '🏮': 'red-paper-lantern',
+    '⭐': 'star',
+    '🍁': 'maple-leaf',
+    '🦋': 'butterfly',
+    '🌙': 'crescent-moon',
+    '🛠': 'hammer-and-wrench',
+    '🔧': 'wrench',
     // オリジナルSVG（絵文字にない作物）。:名前: の形で items.js から使う
     ':daikon:': 'crops/daikon.svg',
     ':cabbage:': 'crops/cabbage.svg',

@@ -1,5 +1,5 @@
 // オフライン対応：ネットにつながるときは最新版、つながらないときはキャッシュで動く
-const CACHE = 'agri-kingdom-v12';
+const CACHE = 'agri-kingdom-v13';
 const FB = 'https://www.gstatic.com/firebasejs/10.12.2/';
 const FILES = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png',

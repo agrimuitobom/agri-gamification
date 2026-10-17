@@ -53,7 +53,7 @@ window.AK = window.AK || {};
 
   // ---------- セーブデータ ----------
   const KEY = 'agriKingdom.save.v1';
-  const MAP_KEYS = ['inv', 'tiles', 'dex', 'ach', 'qlog'];
+  const MAP_KEYS = ['inv', 'tiles', 'dex', 'ach', 'qlog', 'rv', 'upg'];
 
   AK.defaultState = () => ({
     v: 1,
@@ -70,7 +70,11 @@ window.AK = window.AK || {};
       byField: { basic: { a: 0, c: 0 }, veg: { a: 0, c: 0 }, flower: { a: 0, c: 0 }, fruit: { a: 0, c: 0 }, crop: { a: 0, c: 0 }, food: { a: 0, c: 0 } },
     },
     dex: {},
-    wrong: [],
+    wrong: [], // 復習ノートに入っている問題ID
+    rv: {}, // 復習ノートの進み具合 { id: { st: 正解回数, due: 次に出題できる時刻 } }
+    recent: [], // 最近の正誤（連打対策の報酬ダウン判定用）
+    upg: {}, // 施設の強化レベル { itemId: 2 }
+    design: { owned: [], sky: '', fence: '', ground: '', emblem: '', top: '', bottom: '' },
     ach: {},
     daily: { date: '', missions: [], streak: 0 },
     best: { kantei: 0 },
@@ -98,6 +102,60 @@ window.AK = window.AK || {};
     if (s) MAP_KEYS.forEach((k) => { if (s[k]) st[k] = s[k]; });
     AK.S = st;
     AK.applyHouse();
+    AK.applyUpgrades();
+  };
+
+  // ---------- 施設強化（Lv1〜3。種類ごとに強化され、同じ施設すべてに効く） ----------
+  AK.UPG_MAX = 3;
+  AK.UPG_COST = { N: [150, 400], R: [300, 800], SR: [600, 1500], SSR: [1200, 3000] };
+  AK.isUpgradable = (id) => ['speed', 'coin', 'xp', 'guard', 'shop', 'castle'].includes((AK.ITEMS[id] || {}).effect);
+  AK.upgLv = (id) => (AK.S && AK.S.upg[id]) || 1;
+  AK.upgCost = (id) => { const lv = AK.upgLv(id); return lv >= AK.UPG_MAX ? null : AK.UPG_COST[AK.ITEMS[id].rarity][lv - 1]; };
+  AK.upgRange = (id) => (AK.upgLv(id) >= 3 ? 2 : 1); // Lv3 で 5×5 マスに
+  AK.upgMult = (lv) => 1.5 + 0.25 * (lv - 1); // 1.5 → 1.75 → 2.0
+  AK.effectTextFor = function (id, lv) {
+    const it = AK.ITEMS[id], area = lv >= 3 ? '周囲24マス（5×5）' : '周囲8マス';
+    switch (it.effect) {
+      case 'speed': return `${area}の作物の成長が${AK.upgMult(lv)}倍速`;
+      case 'coin': return `${area}の収穫コイン${AK.upgMult(lv)}倍`;
+      case 'xp': return `${area}の収穫XP${AK.upgMult(lv)}倍`;
+      case 'guard': return `${area}で病害虫が発生しなくなる`;
+      case 'shop': return `王国全体の収穫コイン+${20 + 10 * (lv - 1)}%（3つまで重複）`;
+      case 'castle': return `王国全体の収穫コイン・XP +${30 + 10 * (lv - 1)}%`;
+      default: return it.effectText || '';
+    }
+  };
+  AK.applyUpgrades = function () {
+    Object.keys(AK.ITEMS).filter(AK.isUpgradable).forEach((id) => {
+      const lv = AK.upgLv(id);
+      AK.ITEMS[id].effectText = AK.effectTextFor(id, lv) + (lv > 1 ? `（Lv.${lv}）` : '');
+    });
+  };
+  AK.upgrade = function (id) {
+    const cost = AK.upgCost(id);
+    if (cost == null || AK.S.coins < cost) return false;
+    AK.S.coins -= cost;
+    AK.S.upg[id] = AK.upgLv(id) + 1;
+    AK.applyUpgrades();
+    AK.checkAchievements();
+    AK.save();
+    AK.emit('change');
+    return true;
+  };
+
+  // ---------- 王国デザイン ----------
+  AK.designOwned = (slot, id) => id === '' || AK.S.design.owned.includes(slot + ':' + id);
+  AK.designOf = (slot) => (AK.DESIGNS[slot] || []).find((d) => d.id === (AK.S.design[slot] || '')) || AK.DESIGNS[slot][0];
+  AK.buyDesign = function (slot, id) {
+    const d = AK.DESIGNS[slot].find((x) => x.id === id);
+    if (!d || AK.designOwned(slot, id) || AK.S.coins < d.price) return false;
+    AK.S.coins -= d.price;
+    AK.S.design.owned.push(slot + ':' + id);
+    AK.S.design[slot] = id;
+    AK.checkAchievements();
+    AK.save();
+    AK.emit('change');
+    return true;
   };
 
   // ---------- 農家の家の進化 ----------
@@ -182,6 +240,47 @@ window.AK = window.AK || {};
     AK.emit('change');
   };
 
+  // ---------- 復習ノート（間隔をあけて3回正解で卒業） ----------
+  AK.REVIEW_GOAL = 3;
+  AK.REVIEW_WAIT = [0, 10 * 60 * 1000, 20 * 60 * 60 * 1000]; // 正解0回→すぐ、1回→10分後、2回→翌日（20時間後）
+  AK.reviewAdd = function (id) {
+    const S = AK.S;
+    if (!S.wrong.includes(id)) S.wrong.push(id);
+    S.rv[id] = { st: 0, due: 0 };
+  };
+  AK.reviewDue = () => AK.S.wrong.filter((id) => ((AK.S.rv[id] || {}).due || 0) <= Date.now());
+  AK.reviewStage = (id) => (AK.S.rv[id] || {}).st || 0;
+  /** 復習で正解したとき。卒業したら true */
+  AK.reviewCorrect = function (id) {
+    const S = AK.S, r = S.rv[id] || { st: 0, due: 0 };
+    r.st++;
+    if (r.st >= AK.REVIEW_GOAL) {
+      S.wrong = S.wrong.filter((x) => x !== id);
+      delete S.rv[id];
+      S.stats.reviewed++;
+      return true;
+    }
+    r.due = Date.now() + AK.REVIEW_WAIT[r.st];
+    S.rv[id] = r;
+    return false;
+  };
+  /** 次に復習できるようになるまでの時間（ミリ秒）。なければ null */
+  AK.reviewNextIn = function () {
+    const S = AK.S, now = Date.now();
+    const dues = S.wrong.map((id) => (S.rv[id] || {}).due || 0).filter((d) => d > now);
+    return dues.length ? Math.min(...dues) - now : null;
+  };
+  AK.fmtWait = (ms) => (ms >= 3600000 ? `${Math.ceil(ms / 3600000)}時間` : `${Math.max(1, Math.ceil(ms / 60000))}分`);
+
+  // ---------- 連打対策：最近の正答率 ----------
+  AK.pushRecent = function (ok) {
+    const r = AK.S.recent;
+    r.push(ok ? 1 : 0);
+    while (r.length > 10) r.shift();
+  };
+  /** 最近10問の正答率が4割未満なら報酬ダウン（4択の当てずっぽうは25%） */
+  AK.lowAccuracy = () => AK.S.recent.length >= 6 && AK.S.recent.reduce((a, b) => a + b, 0) / AK.S.recent.length < 0.4;
+
   // ---------- 旬 ----------
   AK.inSeason = (id) => {
     const i = AK.ITEMS[id];
@@ -241,7 +340,7 @@ window.AK = window.AK || {};
     { id: 'harvest5', text: '5回収穫する', goal: 5, ev: 'harvest' },
     { id: 'combo5', text: '5コンボを達成する', goal: 5, ev: 'combo', max: true },
     { id: 'kantei1', text: '鑑定競技モードを1回クリア', goal: 1, ev: 'kantei' },
-    { id: 'review3', text: '復習ノートの問題を3問克服', goal: 3, ev: 'review' },
+    { id: 'review3', text: '復習ノートで3問正解する', goal: 3, ev: 'review' },
     { id: 'place5', text: 'アイテムを5個配置する', goal: 5, ev: 'place' },
     { id: 'trouble1', text: '病害虫トラブルを1回解決', goal: 1, ev: 'trouble' },
     { id: 'boss1', text: '今日のボスを討伐する', goal: 1, ev: 'boss' },
@@ -336,11 +435,13 @@ window.AK = window.AK || {};
     { id: 'star100', icon: '🌟', name: '図鑑マイスター', desc: '図鑑の★を100個集める', ok: (s) => Object.keys(AK.ITEMS).filter((id) => !AK.ITEMS[id].noDrop).reduce((a, id) => a + AK.stars(id), 0) >= 100 },
     { id: 'starAll', icon: '👑', name: '★コンプリート', desc: '図鑑をすべて★3にする', ok: (s) => Object.keys(AK.ITEMS).filter((id) => !AK.ITEMS[id].noDrop).every((id) => AK.stars(id) >= 3) },
     { id: 'castle', icon: '🏰', name: '農業王の城', desc: '農家の家を城まで進化させる（Lv.20）', ok: (s) => s.level >= 20 },
+    { id: 'upg3', icon: '🔧', name: '施設マスター', desc: '施設をLv.3まで強化する', ok: (s) => Object.values(s.upg || {}).some((lv) => lv >= 3) },
+    { id: 'design5', icon: '🎨', name: '王国デザイナー', desc: '王国デザインを5つ買う', ok: (s) => (s.design.owned || []).length >= 5 },
     { id: 'kanteiS', icon: '🏅', name: '鑑定競技Sランク', desc: '鑑定競技モードでSランク', ok: (s) => s.stats.kanteiS >= 1 },
     { id: 'trouble10', icon: '🛡️', name: '病害虫ハンター', desc: '病害虫トラブルを10回解決', ok: (s) => s.stats.troubles >= 10 },
     { id: 'boss1', icon: '⚔️', name: 'ボス討伐', desc: 'ボスを初めて討伐する', ok: (s) => s.boss.wins >= 1 },
     { id: 'boss10', icon: '🗡️', name: '王国の守護神', desc: 'ボスを10回討伐する', ok: (s) => s.boss.wins >= 10 },
-    { id: 'review10', icon: '💪', name: '苦手克服', desc: '復習ノートの問題を10問克服', ok: (s) => s.stats.reviewed >= 10 },
+    { id: 'review10', icon: '💪', name: '苦手克服', desc: '復習ノートの問題を10問卒業させる', ok: (s) => s.stats.reviewed >= 10 },
   ];
   AK.checkAchievements = function () {
     const S = AK.S;

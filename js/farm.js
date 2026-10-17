@@ -14,22 +14,27 @@
   const it = (t) => AK.ITEMS[t.id];
   const isCrop = (t) => !!t && it(t) && it(t).type === 'crop';
   const keyOf = (x, y) => `${x},${y}`;
-  function neighbors(k) {
-    const [x, y] = k.split(',').map(Number), r = [];
-    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) if (dx || dy) r.push(keyOf(x + dx, y + dy));
-    return r;
+  const buildingsOf = (effect) => Object.entries(AK.S.tiles).filter(([, t]) => it(t) && it(t).effect === effect);
+  /** マス k に効いている施設のうち、いちばん高い強化レベル（効いていなければ 0）。効果範囲は強化レベルで広がる */
+  function nearLv(k, effect) {
+    const [x, y] = k.split(',').map(Number);
+    let best = 0;
+    for (const [bk, t] of buildingsOf(effect)) {
+      const [bx, by] = bk.split(',').map(Number);
+      const d = Math.max(Math.abs(bx - x), Math.abs(by - y));
+      if (d > 0 && d <= AK.upgRange(t.id)) best = Math.max(best, AK.upgLv(t.id));
+    }
+    return best;
   }
-  function hasNeighbor(k, effect) {
-    return neighbors(k).some((n) => { const t = AK.S.tiles[n]; return t && it(t) && it(t).effect === effect; });
-  }
-  const countEffect = (effect) => Object.values(AK.S.tiles).filter((t) => it(t) && it(t).effect === effect).length;
+  const effMult = (k, effect) => { const lv = nearLv(k, effect); return lv ? AK.upgMult(lv) : 1; };
+  const countEffect = (effect) => buildingsOf(effect).length;
   function needTime(t) {
     const i = it(t);
     if (t.r) return Math.round(i.grow * 0.6); // 果樹の2回目以降
     return i.perennial ? Math.round(i.grow * 1.5) : i.grow;
   }
   const isReady = (t) => isCrop(t) && t.bug == null && t.p >= needTime(t);
-  const speedOf = (k) => (hasNeighbor(k, 'speed') ? 1.5 : 1) * (AK.S.tiles[k] && AK.inSeason(AK.S.tiles[k].id) ? 1.5 : 1);
+  const speedOf = (k) => effMult(k, 'speed') * (AK.S.tiles[k] && AK.inSeason(AK.S.tiles[k].id) ? 1.5 : 1);
   Farm.expandCost = (land) => 50 + 50 * (land - 3) ** 2;
 
   Farm.readyCount = () => Object.values(AK.S.tiles).filter((t) => isReady(t) || (isCrop(t) && t.bug != null)).length;
@@ -50,7 +55,7 @@
       if (t.p >= need) changed = true;
       else if (online) {
         const ratio = t.p / need;
-        if (ratio > 0.15 && ratio < 0.9 && !hasNeighbor(k, 'guard') && Math.random() < dt / 110) {
+        if (ratio > 0.15 && ratio < 0.9 && !nearLv(k, 'guard') && Math.random() < dt / 110) {
           t.bug = Math.floor(Math.random() * BUGS.length);
           changed = true;
           if (Farm.tileEls[k]) AK.Sound.play('bug');
@@ -71,14 +76,16 @@
     const hasTractor = countEffect('harvestAll') > 0;
 
     const head = h('div', { class: 'farm-head' },
-      h('div', { class: 'kingdom-name' }, `🏰 ${S.name || 'あなた'}の王国`),
+      h('div', { class: 'kingdom-name' }, `${AK.designOf('emblem').mark} ${S.name || 'あなた'}の王国`),
       h('div', { class: 'farm-meta' }, `領土 ${S.land}×${S.land}`));
     const actions = h('div', { class: 'farm-actions' },
       hasTractor ? h('button', { class: 'btn small gold', onclick: harvestAll }, '🚜 一括収穫') : null,
+      h('button', { class: 'btn small gold', onclick: () => Farm.workshop() }, '🛠️ 王国づくり'),
       h('button', { class: 'btn small', onclick: expandDialog, disabled: S.land >= MAX_LAND }, S.land >= MAX_LAND ? '🗺️ 領土MAX' : '🗺️ 領土を広げる'),
       h('button', { class: 'btn small', onclick: AK.showHelp }, '❓ 遊び方'));
 
-    const grid = h('div', { class: 'grid', style: { gridTemplateColumns: `repeat(${S.land}, 1fr)` } });
+    const D = S.design;
+    const grid = h('div', { class: 'grid ground-' + (D.ground || 'default'), style: { gridTemplateColumns: `repeat(${S.land}, 1fr)` } });
     for (let y = 0; y < S.land; y++) {
       for (let x = 0; x < S.land; x++) {
         const k = keyOf(x, y);
@@ -87,13 +94,18 @@
         grid.append(el);
       }
     }
-    const field = h('div', { class: 'field-wrap' }, grid);
+    const top = AK.designOf('top').row, bottom = AK.designOf('bottom').row;
+    const scenery = (row, cls) => (row ? h('div', { class: 'scenery ' + cls }, Array.from(row.replace(/\uFE0F/g, '')).map((ch) => h('span', {}, ch))) : null);
+    const field = h('div', { class: 'field-area' },
+      scenery(top, 'top'),
+      h('div', { class: 'field-wrap fence-' + (D.fence || 'default') }, grid),
+      scenery(bottom, 'bottom'));
     const month = new Date().getMonth() + 1;
     const shun = Object.keys(AK.ITEMS).filter((id) => AK.inSeason(id)).map((id) => AK.ITEMS[id].name);
     const season = h('div', { class: 'season-bar' },
       h('b', {}, `🗓️ ${month}月の旬`), ` ${shun.join('・')}`,
       h('span', { class: 'small' }, '（成長1.5倍・コイン1.5倍）'));
-    container.append(h('div', { class: 'farm-screen' }, head, actions, season, field, renderPalette()));
+    container.append(h('div', { class: 'farm-screen sky-' + (D.sky || 'default') }, head, actions, season, field, renderPalette()));
     container.querySelector('.palette').scrollLeft = palScroll;
     Farm.fit();
     Farm.tick();
@@ -221,7 +233,12 @@
     }
     const i = it(t);
     if (i.type === 'crop') {
-      if (t.bug != null) { startTrouble(k); return; }
+      if (t.bug != null) {
+        // 連打対策：まちがえたら20秒間は再挑戦できない
+        if (t.lock && t.lock > Date.now()) { AK.toast(`🐛 作戦を立て直し中… あと${Math.ceil((t.lock - Date.now()) / 1000)}秒で再挑戦できます`); return; }
+        startTrouble(k);
+        return;
+      }
       if (isReady(t)) {
         harvest(k);
         AK.save(); AK.refresh();
@@ -235,15 +252,17 @@
 
   function harvest(k, silent) {
     const S = AK.S, t = S.tiles[k], i = it(t);
-    const castle = countEffect('castle') > 0 ? 1.3 : 1;
-    let coin = i.coin * castle * (1 + 0.2 * Math.min(3, countEffect('shop')));
+    const castles = buildingsOf('castle');
+    const castle = castles.length ? 1.3 + 0.1 * (Math.max(...castles.map(([, c]) => AK.upgLv(c.id))) - 1) : 1;
+    const shopBonus = buildingsOf('shop').slice(0, 3).reduce((a, [, b]) => a + 0.2 + 0.1 * (AK.upgLv(b.id) - 1), 0);
+    let coin = i.coin * castle * (1 + shopBonus);
     let xp = i.xp * castle;
-    if (hasNeighbor(k, 'coin')) coin *= 1.5;
+    coin *= effMult(k, 'coin');
     if (AK.inSeason(t.id)) coin *= 1.5;
     const home = Object.values(S.tiles).some((x) => x.id === 'house') ? AK.ITEMS.house.bonus || 0 : 0;
     coin *= 1 + home;
     xp *= 1 + home;
-    if (hasNeighbor(k, 'xp')) xp *= 1.5;
+    xp *= effMult(k, 'xp');
     coin = Math.round(coin);
     xp = Math.round(xp);
     S.stats.harvested++;
@@ -306,7 +325,10 @@
             AK.FX.confetti(40, { x: c.x, y: c.y });
             AK.floatText('🛡️ 撃退！一気に成長！', c.x, c.y - 10, 'good');
           }, 100);
-        } else AK.refresh();
+        } else {
+          if (!ok && cur === t) { t.lock = Date.now() + 20000; AK.save(); }
+          AK.refresh();
+        }
       },
     });
   }
@@ -318,13 +340,86 @@
       body: h('div', {},
         h('div', { class: 'rar-tag r-' + i.rarity }, `${i.rarity}｜${AK.RARITY[i.rarity].name}`),
         i.effectText ? h('div', { class: 'effect' }, '✨ 効果：' + i.effectText) : null,
-        h('p', {}, i.desc)),
+        h('p', {}, i.desc),
+        AK.isUpgradable(t.id) ? h('p', { class: 'small' }, '🔧 「王国づくり」の施設強化で、効果を強くできます') : null),
       buttons: [
         { label: '📦 しまう', onClick: () => { delete AK.S.tiles[k]; AK.giveBack(t.id); AK.save(); AK.refresh(); } },
+        AK.isUpgradable(t.id) ? { label: '🔧 強化する', onClick: () => { Farm.workshop('upg'); } } : null,
         { label: 'とじる', cls: 'primary' },
-      ],
+      ].filter(Boolean),
     });
   }
+
+  // ---------- 王国づくり（施設強化・デザイン） ----------
+  let wsTab = 'upg';
+  Farm.workshop = function (tab) {
+    if (tab) wsTab = tab;
+    document.querySelectorAll('.modal-back.workshop-back').forEach((m) => m.remove());
+    const body = h('div', { class: 'workshop' });
+    const close = AK.modal({ title: '🛠️ 王国づくり', body, cls: 'wide', buttons: [{ label: 'とじる', cls: 'primary', onClick: () => AK.refresh() }] });
+    document.querySelector('#modal-root .modal-back:last-child').classList.add('workshop-back');
+    const draw = () => {
+      const S = AK.S;
+      body.innerHTML = '';
+      const tabs = [['upg', '🔧 施設強化'], ...AK.DESIGN_SLOTS.map((d) => [d.key, `${d.icon} ${d.name}`])];
+      body.append(
+        h('div', { class: 'ws-coins' }, '所持コイン 💰 ', h('b', {}, String(S.coins))),
+        h('div', { class: 'tabs' }, tabs.map(([id, label]) => h('button', {
+          class: 'tab' + (wsTab === id ? ' on' : ''), onclick: () => { wsTab = id; AK.Sound.play('tap'); draw(); },
+        }, label))));
+      if (wsTab === 'upg') {
+        const ids = Object.keys(AK.ITEMS).filter((id) => AK.isUpgradable(id) && (S.inv[id] || Object.values(S.tiles).some((t) => t.id === id)));
+        body.append(h('p', { class: 'small' }, '強化は施設の種類ごと。同じ施設すべてに効きます。Lv.3で効果範囲が5×5マスに広がる！'));
+        if (!ids.length) body.append(h('p', { class: 'center small' }, '強化できる施設をまだ持っていません。問題に正解して施設を手に入れよう！'));
+        ids.forEach((id) => {
+          const it = AK.ITEMS[id], lv = AK.upgLv(id), cost = AK.upgCost(id);
+          body.append(h('div', { class: 'upg-row' },
+            h('div', { class: 'upg-emoji' }, it.emoji),
+            h('div', { class: 'upg-main' },
+              h('div', { class: 'upg-name' }, `${it.name}　`, h('span', { class: 'lv' }, `Lv.${lv}`)),
+              h('div', { class: 'small' }, '今：' + AK.effectTextFor(id, lv)),
+              cost != null ? h('div', { class: 'small next' }, `▶ Lv.${lv + 1}：` + AK.effectTextFor(id, lv + 1)) : h('div', { class: 'small next' }, '★ 最大レベル')),
+            cost != null ? h('button', {
+              class: 'btn small gold', disabled: S.coins < cost,
+              onclick: () => {
+                if (!AK.upgrade(id)) return;
+                AK.Sound.play('levelup');
+                AK.bigText(`${it.name} Lv.${AK.upgLv(id)}！`, 'mega');
+                AK.FX.confetti(80);
+                draw();
+              },
+            }, `💰${cost}`) : h('span', { class: 'claimed' }, 'MAX')));
+        });
+        return;
+      }
+      const slot = wsTab;
+      const grid = h('div', { class: 'design-grid' });
+      AK.DESIGNS[slot].forEach((d) => {
+        const owned = AK.designOwned(slot, d.id), on = (S.design[slot] || '') === d.id;
+        grid.append(h('button', {
+          class: 'design-card' + (on ? ' on' : ''),
+          onclick: () => {
+            if (on) return;
+            if (owned) { S.design[slot] = d.id; AK.save(); AK.Sound.play('place'); draw(); AK.refresh(); return; }
+            if (S.coins < d.price) { AK.toast(`コインが足りません（あと${d.price - S.coins}）`); return; }
+            if (AK.buyDesign(slot, d.id)) {
+              AK.Sound.play('rare');
+              AK.FX.confetti(60);
+              AK.toast(`🎨「${d.name}」を手に入れた！`);
+              draw();
+              AK.refresh();
+            }
+          },
+        },
+        h('div', { class: `design-prev prev-${slot} ${slot}-${d.id || 'default'}` }, d.row ? Array.from(d.row.replace(/\uFE0F/g, '')).slice(0, 4).join('') : d.mark || ''),
+        h('div', { class: 'design-name' }, d.name),
+        h('div', { class: 'design-price' }, on ? '✅ 使用中' : owned ? '持っている' : `💰 ${d.price}`)));
+      });
+      body.append(h('p', { class: 'small' }, '買ったデザインはいつでも切りかえられます。'), grid);
+    };
+    draw();
+    return close;
+  };
 
   function expandDialog() {
     const S = AK.S;
