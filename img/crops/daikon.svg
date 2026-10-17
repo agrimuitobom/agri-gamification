@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="root" x1="0" x2="1"><stop offset="0" stop-color="#c9d2dc"/><stop offset=".3" stop-color="#ffffff"/><stop offset=".65" stop-color="#eef2f6"/><stop offset="1" stop-color="#a9b5c2"/></linearGradient>
+    <linearGradient id="neck" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#9fd25f"/><stop offset=".6" stop-color="#d9efb8" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="lf1" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#a6e06b"/><stop offset=".5" stop-color="#5cb83a"/><stop offset="1" stop-color="#2e7d2a"/></linearGradient>
+    <linearGradient id="lf2" x1="1" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8fd65a"/><stop offset=".5" stop-color="#4aa834"/><stop offset="1" stop-color="#256b24"/></linearGradient>
+    <filter id="b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter>
+  </defs>
+  <path d="M60 48 C38 34 26 16 34 4 C46 12 54 28 63 44Z" fill="url(#lf1)"/>
+  <path d="M68 46 C72 26 84 8 98 6 C100 22 86 36 72 48Z" fill="url(#lf2)"/>
+  <path d="M63 46 C58 28 60 10 66 0 C74 12 72 30 68 47Z" fill="url(#lf1)"/>
+  <path d="M40 12 C46 18 52 28 60 42" stroke="#d6f5b0" stroke-width="1.5" fill="none" opacity=".7"/>
+  <path d="M46 46 Q64 36 82 46 L78 92 Q71 122 64 127 Q57 122 50 92 Z" fill="url(#root)"/>
+  <path d="M46 46 Q64 36 82 46 L81 60 Q64 52 47 60 Z" fill="url(#neck)"/>
+  <path d="M74 50 L72 92 Q68 116 64 124 Q70 112 74 90Z" fill="#8f9cab" opacity=".35"/>
+  <path d="M55 72 q4 1.5 7 0 M62 88 q4 1.5 7 0 M57 102 q3 1 6 0" stroke="#b9c3cd" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <ellipse cx="55" cy="66" rx="4" ry="16" fill="#fff" filter="url(#b)"/>
+</svg>

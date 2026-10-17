@@ -8,6 +8,15 @@
 (function (AK) {
   'use strict';
   AK.EMOJI_MAP = {
+    // オリジナルSVG（絵文字にない作物）。:名前: の形で items.js から使う
+    ':daikon:': 'crops/daikon.svg',
+    ':cabbage:': 'crops/cabbage.svg',
+    ':satoimo:': 'crops/satoimo.svg',
+    ':wheat:': 'crops/wheat.svg',
+    ':soba:': 'crops/soba.svg',
+    ':sugarcane:': 'crops/sugarcane.svg',
+    ':beet:': 'crops/beet.svg',
+    ':cotton:': 'crops/cotton.svg',
     '🥬': 'leafy-green',
     '🧅': 'onion',
     '🧄': 'garlic',
@@ -170,7 +179,8 @@
 
   AK.emojiSrc = (e) => {
     const slug = AK.EMOJI_MAP[e.replace(/\uFE0F/g, '')];
-    return slug ? BASE + slug + '.webp' : null;
+    if (!slug) return null;
+    return slug.includes('/') ? 'img/' + slug : BASE + slug + '.webp';
   };
 
   function processText(node) {
@@ -218,6 +228,8 @@
 
   /** 紙吹雪（canvas）用の画像。読み込み前は null（文字で描く） */
   const cache = {};
+  // オリジナル画像は先に読み込んでおく（収穫演出で文字が出ないように）
+  setTimeout(() => keys.filter((k) => k.startsWith(':')).forEach((k) => AK.emojiImage(k)), 0);
   AK.emojiImage = (e) => {
     const src = AK.emojiSrc(e);
     if (!src) return null;
