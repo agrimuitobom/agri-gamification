@@ -9,7 +9,15 @@
 window.AK = window.AK || {};
 
 // Firebase コンソール →「プロジェクトの設定」→「マイアプリ」の firebaseConfig をそのまま貼り付け
-AK.FIREBASE_CONFIG = null;
+AK.FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyD3P50Qko2N3pJOw_d3EN7RJa8N5OZAWvM',
+  authDomain: 'agri-kingdom.firebaseapp.com',
+  projectId: 'agri-kingdom',
+  storageBucket: 'agri-kingdom.firebasestorage.app',
+  messagingSenderId: '1023986875555',
+  appId: '1:1023986875555:web:af2ae2571ab07ce65e9316',
+  measurementId: 'G-RSGEVFBGC5',
+};
 /* 例：
 AK.FIREBASE_CONFIG = {
   apiKey: 'AIza....',
