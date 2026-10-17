@@ -178,7 +178,8 @@
     const need = needTime(t), ratio = Math.min(1, t.p / need);
     const stage = t.bug != null ? 'bug' + t.bug : ratio >= 1 ? 'ready' : ratio < 0.5 ? 's1' : 's2';
     const shun = AK.inSeason(t.id);
-    const sig = t.id + stage + shun;
+    const boost = stage !== 'ready' && nearLv(k, 'speed') > 0; // スプリンクラーが効いている
+    const sig = t.id + stage + shun + boost;
     if (Farm.sig[k] !== sig) {
       Farm.sig[k] = sig;
       let inner;
@@ -193,7 +194,8 @@
         if (t.bug != null) inner += `<span class="bug">${BUGS[t.bug].e}</span><span class="alert">!</span>`;
       }
       if (shun) inner += '<span class="shun">旬</span>';
-      el.className = `tile crop ${stage === 'ready' ? 'ready' : ''} ${t.bug != null ? 'has-bug' : ''} ${i.gold ? 'gold' : ''}`;
+      if (boost) inner += `<span class="boost">💦×${AK.upgMult(nearLv(k, 'speed'))}</span>`;
+      el.className = `tile crop ${stage === 'ready' ? 'ready' : ''} ${t.bug != null ? 'has-bug' : ''} ${i.gold ? 'gold' : ''} ${boost ? 'boosted' : ''}`;
       el.innerHTML = inner;
     }
     const bar = el.querySelector('.pbar i');
@@ -244,7 +246,7 @@
         AK.save(); AK.refresh();
         return;
       }
-      AK.toast(`${i.emoji} ${i.name}：収穫まであと ${AK.fmtTime((needTime(t) - t.p) / speedOf(k))}`);
+      AK.toast(`${i.emoji} ${i.name}：収穫まであと ${AK.fmtTime((needTime(t) - t.p) / speedOf(k))}${nearLv(k, 'speed') ? `<br><small>💦 スプリンクラー効果で ${AK.upgMult(nearLv(k, 'speed'))}倍速！</small>` : ''}`);
       return;
     }
     showObjInfo(k);

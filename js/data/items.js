@@ -16,7 +16,7 @@ AK.RARITY = {
 
 (function () {
   // レア度ごとの成長時間（秒）・収穫コイン・収穫XP
-  const GROW = { N: 45, R: 90, SR: 150, SSR: 240 };
+  const GROW = { N: 80, R: 150, SR: 240, SSR: 420 };
   const COIN = { N: 10, R: 25, SR: 60, SSR: 200 };
   const XP = { N: 5, R: 12, SR: 30, SSR: 100 };
 

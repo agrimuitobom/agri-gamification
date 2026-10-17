@@ -622,3 +622,12 @@ img.emo {
 .prev-ground.ground-flowers { background: radial-gradient(circle, #f9a8d4 0 3px, transparent 4px), radial-gradient(circle, #fde047 0 3px, transparent 4px), #84cc16; background-size: 20px 20px, 24px 24px, 100% 100%; background-position: 0 0, 10px 8px, 0 0; }
 .prev-ground.ground-stone { background: radial-gradient(circle, #e7e5e4 0 42%, transparent 45%) 0 0 / 16px 16px, radial-gradient(circle, #d6d3d1 0 40%, transparent 43%) 8px 8px / 16px 16px, #a8a29e; }
 .prev-ground.ground-snow { background: radial-gradient(circle at 30% 30%, #fff 0 2px, transparent 3px), #e0f2fe; background-size: 12px 12px, 100% 100%; }
+
+/* スプリンクラーが効いているマス */
+.tile.boosted .pbar i { background: linear-gradient(90deg, #38bdf8, #7dd3fc); box-shadow: 0 0 6px #38bdf8; }
+.tile.boosted { box-shadow: inset 0 0 0 2px rgba(56, 189, 248, .7), inset 0 -3px 0 rgba(0, 0, 0, .25); }
+.tile .boost {
+  position: absolute; left: 3px; bottom: 9%; font-size: clamp(8px, .2em, 12px); font-weight: 800; color: #0369a1;
+  background: rgba(255, 255, 255, .85); border-radius: 6px; padding: 0 3px; line-height: 1.4;
+}
+.tile .boost img.emo { width: 1em; height: 1em; }
