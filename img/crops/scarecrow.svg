@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="pole" x1="0" x2="1"><stop offset="0" stop-color="#6b4226"/><stop offset=".45" stop-color="#b9824e"/><stop offset="1" stop-color="#4a2c17"/></linearGradient>
+    <linearGradient id="arm" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#b9824e"/><stop offset="1" stop-color="#5b3419"/></linearGradient>
+    <radialGradient id="hat" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#fff3c4"/><stop offset=".55" stop-color="#e9c46a"/><stop offset="1" stop-color="#a67c1e"/></radialGradient>
+    <radialGradient id="face" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#fffdf5"/><stop offset=".7" stop-color="#efe3c8"/><stop offset="1" stop-color="#c9b68e"/></radialGradient>
+    <linearGradient id="cloth" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset=".55" stop-color="#2563eb"/><stop offset="1" stop-color="#1e3a8a"/></linearGradient>
+    <linearGradient id="patch" x1="0" x2="1"><stop offset="0" stop-color="#fca5a5"/><stop offset="1" stop-color="#dc2626"/></linearGradient>
+    <radialGradient id="ground" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#86c95a"/><stop offset="1" stop-color="#3f8f2a"/></radialGradient>
+  </defs>
+  <ellipse cx="64" cy="118" rx="26" ry="7" fill="url(#ground)"/>
+  <!-- 支柱 -->
+  <rect x="60" y="40" width="8" height="78" rx="3" fill="url(#pole)"/>
+  <!-- 横木 -->
+  <rect x="14" y="52" width="100" height="7" rx="3" fill="url(#arm)"/>
+  <!-- わら（袖口・すそ） -->
+  <g stroke="#e9c46a" stroke-width="2.2" stroke-linecap="round">
+    <path d="M16 56 l-8 -4"/><path d="M16 58 l-9 2"/><path d="M16 60 l-6 7"/>
+    <path d="M112 56 l8 -4"/><path d="M112 58 l9 2"/><path d="M112 60 l6 7"/>
+    <path d="M50 96 l-4 9"/><path d="M58 98 l-1 9"/><path d="M70 98 l1 9"/><path d="M78 96 l4 9"/>
+  </g>
+  <!-- 着物 -->
+  <path d="M18 50 H110 L106 66 H84 L82 98 H46 L44 66 H22Z" fill="url(#cloth)"/>
+  <path d="M56 50 L64 68 L72 50" fill="#1e3a8a" opacity=".6"/>
+  <path d="M46 78 H82" stroke="#facc15" stroke-width="4"/>
+  <rect x="30" y="54" width="12" height="9" rx="2" fill="url(#patch)" transform="rotate(-8 36 58)"/>
+  <rect x="70" y="82" width="9" height="9" rx="2" fill="url(#patch)" transform="rotate(10 74 86)"/>
+  <g stroke="#fff" stroke-width="1" stroke-dasharray="2 2" fill="none" opacity=".8"><rect x="30" y="54" width="12" height="9" rx="2" transform="rotate(-8 36 58)"/><rect x="70" y="82" width="9" height="9" rx="2" transform="rotate(10 74 86)"/></g>
+  <!-- 顔（布袋） -->
+  <circle cx="64" cy="36" r="15" fill="url(#face)"/>
+  <path d="M52 46 q12 6 24 0" stroke="#a8936a" stroke-width="2" fill="none"/>
+  <g stroke="#3f2a1a" stroke-width="2.6" stroke-linecap="round"><path d="M57 33 l4 4 M61 33 l-4 4"/><path d="M67 33 l4 4 M71 33 l-4 4"/></g>
+  <path d="M57 42 q7 4 14 0" stroke="#b91c1c" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <ellipse cx="57" cy="29" rx="4" ry="2.5" fill="#fff" opacity=".8"/>
+  <!-- 麦わら帽子 -->
+  <ellipse cx="64" cy="24" rx="30" ry="8" fill="url(#hat)"/>
+  <path d="M48 23 C48 6 80 6 80 23Z" fill="url(#hat)"/>
+  <path d="M48 20 C56 23 72 23 80 20 L80 23 C72 26 56 26 48 23Z" fill="#dc2626"/>
+  <g stroke="#a67c1e" stroke-width="1" opacity=".6" fill="none"><path d="M40 24 q24 6 48 0"/><path d="M52 14 q12 -3 24 0"/></g>
+</svg>
