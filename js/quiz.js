@@ -80,7 +80,14 @@
   function start(opts) {
     root = document.getElementById('quiz-root');
     let queue = opts.queue || null;
-    if (opts.mode === 'kantei') queue = AK.shuffle(Object.keys(AK.FIELDS).flatMap((f) => drawMany(f, 5)));
+    if (opts.mode === 'kantei') {
+      // 全分野から均等に20問
+      const fs = Object.keys(AK.FIELDS), per = Math.floor(20 / fs.length);
+      queue = fs.flatMap((f) => drawMany(f, per));
+      const seen = new Set(queue.map((q) => q.id));
+      for (let guard = 0; queue.length < 20 && guard < 200; guard++) { const q = draw('mix'); if (!seen.has(q.id)) { seen.add(q.id); queue.push(q); } }
+      queue = AK.shuffle(queue);
+    }
     if (opts.mode === 'exam') queue = drawMany('mix', opts.count || 5);
     if (opts.mode === 'trouble') queue = drawMany(opts.field, 1);
     s = {

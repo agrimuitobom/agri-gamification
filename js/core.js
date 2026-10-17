@@ -67,7 +67,7 @@ window.AK = window.AK || {};
     lastTick: Date.now(),
     stats: {
       answered: 0, correct: 0, bestCombo: 0, harvested: 0, exams: 0, troubles: 0, reviewed: 0, kanteiS: 0,
-      byField: { veg: { a: 0, c: 0 }, flower: { a: 0, c: 0 }, fruit: { a: 0, c: 0 }, crop: { a: 0, c: 0 } },
+      byField: { basic: { a: 0, c: 0 }, veg: { a: 0, c: 0 }, flower: { a: 0, c: 0 }, fruit: { a: 0, c: 0 }, crop: { a: 0, c: 0 } },
     },
     dex: {},
     wrong: [],
@@ -190,7 +190,9 @@ window.AK = window.AK || {};
   /** 分野 field の正解で手に入るアイテムを1つ抽選（コンボが高いほどレアが出やすい） */
   AK.rollDrop = function (field, combo = 0) {
     const rar = AK.rollRarity(combo);
-    const f = field === 'mix' || !AK.FIELDS[field] ? AK.rand(Object.keys(AK.FIELDS)) : field;
+    // 作物アイテムがある分野から選ぶ（共通の問題なら、どこかの分野の種が出る）
+    const cropFields = Object.keys(AK.FIELDS).filter((k) => Object.values(AK.ITEMS).some((it) => it.type === 'crop' && it.field === k));
+    const f = cropFields.includes(field) ? field : AK.rand(cropFields);
     const seedFirst = Math.random() < 0.72;
     const ids = Object.keys(AK.ITEMS);
     const seeds = (r) => ids.filter((id) => AK.ITEMS[id].type === 'crop' && AK.ITEMS[id].field === f && AK.ITEMS[id].rarity === r);
@@ -208,6 +210,7 @@ window.AK = window.AK || {};
   AK.MISSIONS = [
     { id: 'correct10', text: '問題に10問正解する', goal: 10, ev: 'correct' },
     { id: 'correct20', text: '問題に20問正解する', goal: 20, ev: 'correct' },
+    { id: 'basic5', text: '共通の問題に5問正解', goal: 5, ev: 'correct_basic' },
     { id: 'veg5', text: '野菜の問題に5問正解', goal: 5, ev: 'correct_veg' },
     { id: 'flower5', text: '草花の問題に5問正解', goal: 5, ev: 'correct_flower' },
     { id: 'fruit5', text: '果樹の問題に5問正解', goal: 5, ev: 'correct_fruit' },
@@ -294,6 +297,7 @@ window.AK = window.AK || {};
     { id: 'combo5', icon: '🔥', name: 'ノってきた！', desc: '5コンボ達成', ok: (s) => s.stats.bestCombo >= 5 },
     { id: 'combo10', icon: '☄️', name: '止まらない！', desc: '10コンボ達成', ok: (s) => s.stats.bestCombo >= 10 },
     { id: 'combo30', icon: '🌋', name: '伝説のコンボ', desc: '30コンボ達成', ok: (s) => s.stats.bestCombo >= 30 },
+    { id: 'basic30', icon: '🌱', name: '農業基礎マスター', desc: '共通の問題に30問正解', ok: (s) => fc('basic')(s) >= 30 },
     { id: 'veg30', icon: '🥕', name: '野菜博士', desc: '野菜の問題に30問正解', ok: (s) => fc('veg')(s) >= 30 },
     { id: 'flower30', icon: '🌷', name: '草花博士', desc: '草花の問題に30問正解', ok: (s) => fc('flower')(s) >= 30 },
     { id: 'fruit30', icon: '🍎', name: '果樹博士', desc: '果樹の問題に30問正解', ok: (s) => fc('fruit')(s) >= 30 },

@@ -153,7 +153,7 @@
   Screens.dex = function (v) {
     const S = AK.S;
     v.innerHTML = '';
-    const tabs = [...Object.entries(AK.FIELDS).map(([id, F]) => [id, F.icon + F.name]), ['facility', '🏗️施設']];
+    const tabs = [...Object.entries(AK.FIELDS).filter(([id]) => Object.values(AK.ITEMS).some((i) => i.field === id)).map(([id, F]) => [id, F.icon + F.name]), ['facility', '🏗️施設']];
     const inTab = (id) => {
       const i = AK.ITEMS[id];
       if (i.noDrop) return false;
