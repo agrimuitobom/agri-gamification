@@ -24,7 +24,7 @@ AK.RARITY = {
     { type: 'crop', field, rarity, emoji, name, desc, grow: GROW[rarity], coin: COIN[rarity], xp: XP[rarity] },
     extra || {}
   )];
-  const tree = (id, rarity, emoji, name, desc) => crop(id, 'fruit', rarity, emoji, name, desc, { perennial: true });
+  const tree = (id, rarity, emoji, name, desc, extra) => crop(id, 'fruit', rarity, emoji, name, desc, Object.assign({ perennial: true }, extra));
   const obj = (id, type, rarity, emoji, name, desc, effect, effectText, extra) => [id, Object.assign(
     { type, rarity, emoji, name, desc, effect: effect || null, effectText: effectText || '' },
     extra || {}

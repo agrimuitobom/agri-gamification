@@ -95,6 +95,7 @@
       h('span', { class: 'small' }, '（成長1.5倍・コイン1.5倍）'));
     container.append(h('div', { class: 'farm-screen' }, head, actions, season, field, renderPalette()));
     container.querySelector('.palette').scrollLeft = palScroll;
+    Farm.fit();
     Farm.tick();
   };
 
@@ -127,6 +128,13 @@
     else hint = h('div', { class: 'pal-hint' }, '👇 アイテムを選んで、空いているマスに置こう');
     return h('div', { class: 'palette-wrap' }, hint, bar);
   }
+
+  /** マスの大きさに合わせて作物の絵の大きさを決める */
+  Farm.fit = function () {
+    const grid = document.querySelector('.farm-screen .grid');
+    if (grid) grid.style.fontSize = Math.round(grid.clientWidth / AK.S.land * 0.58) + 'px';
+  };
+  addEventListener('resize', () => Farm.fit());
 
   /** 毎秒呼ばれる：変化したマスだけ描き直す */
   Farm.tick = function () {

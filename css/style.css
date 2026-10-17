@@ -123,6 +123,7 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .farm-meta { font-size: 12px; color: var(--sub); font-weight: 800; }
 .farm-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .field-wrap {
+  width: min(100%, max(300px, calc(100dvh - 400px))); margin: 0 auto;
   background: linear-gradient(#7cb342, #689f38);
   border-radius: 18px; padding: 8px; box-shadow: inset 0 0 0 4px #558b2f, var(--shadow);
 }
@@ -131,7 +132,7 @@ button:disabled { cursor: not-allowed; opacity: .5; }
   aspect-ratio: 1; border: none; border-radius: 10px; position: relative; overflow: hidden;
   background: #9ccc65; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .12);
   display: grid; place-items: center; padding: 0;
-  font-size: clamp(16px, 6vw, 34px);
+  font-size: inherit;
 }
 .tile.empty { background: repeating-linear-gradient(45deg, #9ccc65 0 6px, #95c45d 6px 12px); }
 .tile.can-place { animation: placeable 1s infinite; }
@@ -151,10 +152,10 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .tile.has-bug { animation: bugShake .5s infinite; }
 .tile .bug { position: absolute; font-size: .6em; right: 4%; top: 6%; animation: bob .5s infinite; }
 .tile .alert {
-  position: absolute; left: 4px; bottom: 4px; width: 1.1em; height: 1.1em; line-height: 1.1em; font-size: .4em;
+  position: absolute; left: 4px; bottom: 4px; width: 1.1em; height: 1.1em; line-height: 1.1em; font-size: clamp(10px, .3em, 18px);
   border-radius: 50%; background: var(--red); color: #fff; font-weight: 800;
 }
-.tile.obj.r-SSR, .tile.gold .em, .tile.gold .fruit { filter: drop-shadow(0 0 6px gold) drop-shadow(0 0 2px #fff); }
+.tile.obj.r-SSR .em { filter: drop-shadow(0 0 6px gold) drop-shadow(0 0 2px #fff); }
 .tile.obj.r-SSR { background: radial-gradient(circle, #fff8c4, #aed581); }
 
 .palette-wrap {
@@ -179,7 +180,10 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .r-SSR { border-color: var(--r-SSR); }
 .pal-item.r-SSR, .item-card.r-SSR { background: linear-gradient(135deg, #fff8d6, #ffe08a); }
 .pal-item.r-SR, .item-card.r-SR { background: linear-gradient(135deg, #fff, #f3e8ff); }
-.gold .pe, .gold .ic-emoji, .gold .c-emoji, .big-emoji.gold { filter: drop-shadow(0 0 6px gold) saturate(1.4) hue-rotate(-15deg); }
+/* 黄金アイテム：画像を金色に */
+.gold img.emo, .tile.gold .em img.emo, .tile.gold .fruit img.emo {
+  filter: grayscale(1) sepia(1) saturate(4) hue-rotate(-6deg) brightness(1.35) contrast(1.05) drop-shadow(0 0 6px #ffd700);
+}
 
 /* ============ 鑑定メニュー ============ */
 .mission { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px dashed #e5e7eb; }
@@ -455,7 +459,7 @@ button:disabled { cursor: not-allowed; opacity: .5; }
   font-size: 10px; padding: 0 4px; line-height: 1.5;
 }
 .pal-item .shun { top: -6px; left: -4px; }
-.tile .shun { right: 2px; top: 2px; font-size: max(8px, .28em); }
+.tile .shun { right: 2px; top: 2px; font-size: clamp(8px, .22em, 13px); }
 .tile.ready .shun { right: auto; left: 2px; }
 
 /* ============ ボス ============ */
@@ -524,3 +528,13 @@ a.btn { text-decoration: none; display: inline-block; }
 }
 #err-box pre { white-space: pre-wrap; word-break: break-all; font-size: 12px; margin: 6px 0; max-height: 160px; overflow: auto; user-select: text; }
 #err-box .btn { margin-right: 6px; }
+
+/* ============ 絵文字画像 ============ */
+img.emo {
+  width: 1em; height: 1em; display: inline-block; vertical-align: -0.14em;
+  object-fit: contain; pointer-events: none; -webkit-user-drag: none;
+}
+.tile img.emo { vertical-align: middle; }
+.tile .em img.emo { filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .25)); }
+.item-card.unknown .ic-emoji img.emo { filter: grayscale(1); }
+.tile.gold .em.tree img.emo { filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .25)); }

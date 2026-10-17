@@ -112,9 +112,13 @@
           c.translate(p.x, p.y);
           c.rotate(p.rot);
           if (p.emoji) {
-            c.font = `${p.size}px serif`;
-            c.textAlign = 'center';
-            c.fillText(p.emoji, 0, 0);
+            const img = AK.emojiImage && AK.emojiImage(p.emoji);
+            if (img) c.drawImage(img, -p.size / 2, -p.size / 2, p.size, p.size);
+            else {
+              c.font = `${p.size}px serif`;
+              c.textAlign = 'center';
+              c.fillText(p.emoji, 0, 0);
+            }
           } else {
             c.fillStyle = p.color;
             if (p.circle) { c.beginPath(); c.arc(0, 0, p.size / 2, 0, Math.PI * 2); c.fill(); }

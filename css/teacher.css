@@ -44,3 +44,4 @@ main { max-width: 1280px; margin: 0 auto; padding: 16px; display: flex; flex-dir
 .t-table td.low { color: #b91c1c; font-weight: 800; background: #fef2f2; }
 .t-table td.high { color: #047857; font-weight: 800; }
 .t-table td.q { white-space: normal; min-width: 320px; }
+img.emo { width: 1.1em; height: 1.1em; vertical-align: -0.2em; object-fit: contain; }

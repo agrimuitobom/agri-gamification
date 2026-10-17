@@ -1,9 +1,9 @@
 // オフライン対応：ネットにつながるときは最新版、つながらないときはキャッシュで動く
-const CACHE = 'agri-kingdom-v5';
+const CACHE = 'agri-kingdom-v6';
 const FB = 'https://www.gstatic.com/firebasejs/10.12.2/';
 const FILES = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png',
-  './js/firebase-config.js', './js/data/questions.js', './js/data/items.js', './js/core.js', './js/effects.js',
+  './js/firebase-config.js', './js/emoji.js', './js/data/questions.js', './js/data/items.js', './js/core.js', './js/effects.js',
   './js/quiz.js', './js/farm.js', './js/screens.js', './js/cloud.js', './js/main.js',
   FB + 'firebase-app-compat.js', FB + 'firebase-auth-compat.js', FB + 'firebase-firestore-compat.js',
 ];

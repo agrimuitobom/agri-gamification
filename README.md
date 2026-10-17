@@ -73,3 +73,8 @@ teacher.html / js/teacher.js / css/teacher.css  先生用ダッシュボード
 firestore.rules     Firestore のセキュリティルール
 sw.js / manifest.webmanifest / icon-*.png  オフライン対応（PWA）
 ```
+
+## クレジット
+
+アイコン画像：[Fluent Emoji](https://github.com/microsoft/fluentui-emoji)（© Microsoft, MIT License）。`img/emoji/LICENSE.txt` を参照。
+画面上の絵文字は `js/emoji.js` によって自動的にこれらの画像に置きかえて表示しています。
