@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#bfe9ff"/><stop offset="1" stop-color="#f0fdf4"/></linearGradient>
+    <linearGradient id="hill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#9ad66a"/><stop offset="1" stop-color="#4f9a34"/></linearGradient>
+    <radialGradient id="cloud" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#e2e8f0"/></radialGradient>
+  </defs>
+  <rect width="400" height="90" fill="url(#sky)"/>
+  <g fill="none" stroke-width="7" opacity=".9">
+    <path d="M70 86 A130 74 0 0 1 330 86" stroke="#ef4444"/>
+    <path d="M77 86 A123 67 0 0 1 323 86" stroke="#f97316"/>
+    <path d="M84 86 A116 60 0 0 1 316 86" stroke="#facc15"/>
+    <path d="M91 86 A109 53 0 0 1 309 86" stroke="#22c55e"/>
+    <path d="M98 86 A102 46 0 0 1 302 86" stroke="#3b82f6"/>
+    <path d="M105 86 A95 39 0 0 1 295 86" stroke="#6366f1"/>
+    <path d="M112 86 A88 32 0 0 1 288 86" stroke="#a855f7"/>
+    <animate attributeName="opacity" values=".8;1;.8" dur="4s" repeatCount="indefinite"/>
+  </g>
+  <path d="M110 22 A120 60 0 0 1 290 22" stroke="#fff" stroke-width="3" fill="none" opacity=".5"/>
+  <g fill="url(#cloud)">
+    <ellipse cx="72" cy="74" rx="26" ry="11"/><ellipse cx="56" cy="70" rx="16" ry="10"/><ellipse cx="90" cy="68" rx="16" ry="11"/>
+    <ellipse cx="328" cy="74" rx="26" ry="11"/><ellipse cx="312" cy="68" rx="16" ry="11"/><ellipse cx="346" cy="70" rx="16" ry="10"/>
+  </g>
+  <path d="M0 84 C80 74 160 82 220 78 C290 74 350 84 400 78 V90 H0Z" fill="url(#hill)"/>
+  <g fill="#fde047"><path d="M30 20 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2z"><animate attributeName="opacity" values="0;1;0" dur="2.4s" repeatCount="indefinite"/></path>
+    <path d="M370 26 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2z"><animate attributeName="opacity" values="1;0;1" dur="2.8s" repeatCount="indefinite"/></path></g>
+</svg>

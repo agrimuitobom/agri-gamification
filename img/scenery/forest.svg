@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#cdeefd"/><stop offset="1" stop-color="#ecfccb"/></linearGradient>
+    <linearGradient id="hill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#86c95a"/><stop offset="1" stop-color="#4f9a34"/></linearGradient>
+    <linearGradient id="con" x1="0" x2="1"><stop offset="0" stop-color="#2f7d4a"/><stop offset=".5" stop-color="#3fa064"/><stop offset="1" stop-color="#1f5e36"/></linearGradient>
+    <linearGradient id="conB" x1="0" x2="1"><stop offset="0" stop-color="#5a8f7a"/><stop offset="1" stop-color="#3d6f5c"/></linearGradient>
+    <radialGradient id="leaf" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#bef264"/><stop offset=".5" stop-color="#65a30d"/><stop offset="1" stop-color="#3f6212"/></radialGradient>
+    <linearGradient id="trunk" x1="0" x2="1"><stop offset="0" stop-color="#5b3419"/><stop offset=".5" stop-color="#9a6a42"/><stop offset="1" stop-color="#4a2c17"/></linearGradient>
+  </defs>
+  <rect width="400" height="90" fill="url(#sky)"/>
+  <!-- 奥の木々（シルエット） -->
+  <g fill="url(#conB)" opacity=".85">
+    <path d="M10 70 l14 -40 l14 40z"/><path d="M60 70 l12 -34 l12 34z"/><path d="M130 70 l14 -42 l14 42z"/><path d="M200 70 l12 -36 l12 36z"/><path d="M270 70 l14 -40 l14 40z"/><path d="M340 70 l12 -36 l12 36z"/><path d="M380 70 l10 -30 l10 30z"/>
+  </g>
+  <path d="M0 74 C60 62 120 70 200 64 C280 58 340 70 400 64 V90 H0Z" fill="url(#hill)"/>
+  <!-- 手前の木々（ゆれる） -->
+  <g>
+    <animateTransform attributeName="transform" type="skewX" values="0;1.2;0;-1.2;0" dur="6s" repeatCount="indefinite"/>
+    <rect x="34" y="62" width="6" height="16" rx="2" fill="url(#trunk)"/>
+    <path d="M37 22 l18 28 h-8 l14 18 h-48 l14 -18 h-8z" fill="url(#con)"/>
+    <rect x="96" y="58" width="7" height="20" rx="2" fill="url(#trunk)"/>
+    <circle cx="100" cy="46" r="16" fill="url(#leaf)"/><circle cx="88" cy="54" r="10" fill="url(#leaf)"/><circle cx="112" cy="54" r="10" fill="url(#leaf)"/>
+    <rect x="156" y="62" width="6" height="16" rx="2" fill="url(#trunk)"/>
+    <path d="M159 18 l20 32 h-9 l15 20 h-52 l15 -20 h-9z" fill="url(#con)"/>
+    <rect x="216" y="58" width="7" height="20" rx="2" fill="url(#trunk)"/>
+    <circle cx="220" cy="44" r="17" fill="url(#leaf)"/><circle cx="207" cy="53" r="11" fill="url(#leaf)"/><circle cx="233" cy="53" r="11" fill="url(#leaf)"/>
+    <rect x="276" y="62" width="6" height="16" rx="2" fill="url(#trunk)"/>
+    <path d="M279 24 l17 27 h-8 l13 17 h-44 l13 -17 h-8z" fill="url(#con)"/>
+    <rect x="336" y="58" width="7" height="20" rx="2" fill="url(#trunk)"/>
+    <circle cx="340" cy="46" r="15" fill="url(#leaf)"/><circle cx="329" cy="54" r="10" fill="url(#leaf)"/><circle cx="351" cy="54" r="10" fill="url(#leaf)"/>
+    <rect x="384" y="64" width="5" height="14" rx="2" fill="url(#trunk)"/>
+    <path d="M386 34 l13 22 h-6 l10 13 h-34 l10 -13 h-6z" fill="url(#con)"/>
+  </g>
+  <g fill="#ffffff" opacity=".45"><circle cx="94" cy="40" r="4"/><circle cx="214" cy="38" r="4"/><circle cx="334" cy="40" r="4"/></g>
+  <path d="M0 82 C80 76 160 84 240 80 C300 77 360 84 400 80 V90 H0Z" fill="#4f9a34"/>
+</svg>

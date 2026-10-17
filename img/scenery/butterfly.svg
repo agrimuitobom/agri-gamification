@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 70" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#a3d977"/><stop offset="1" stop-color="#4f9a34"/></linearGradient>
+    <radialGradient id="w1" cx=".3" cy=".3" r=".8"><stop offset="0" stop-color="#fef9c3"/><stop offset=".5" stop-color="#facc15"/><stop offset="1" stop-color="#ca8a04"/></radialGradient>
+    <radialGradient id="w2" cx=".3" cy=".3" r=".8"><stop offset="0" stop-color="#e0f2fe"/><stop offset=".5" stop-color="#60a5fa"/><stop offset="1" stop-color="#1d4ed8"/></radialGradient>
+    <radialGradient id="w3" cx=".3" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#f1f5f9"/><stop offset="1" stop-color="#94a3b8"/></radialGradient>
+    <symbol id="bf" viewBox="-12 -10 24 20">
+      <g><animateTransform attributeName="transform" type="scale" values="1 1; .5 1; 1 1" dur=".6s" repeatCount="indefinite"/>
+        <path d="M0 0 C-4 -10 -12 -10 -11 -2 C-10 3 -4 2 0 0Z" fill="inherit"/><path d="M0 0 C4 -10 12 -10 11 -2 C10 3 4 2 0 0Z" fill="inherit"/>
+        <path d="M0 1 C-3 7 -9 8 -8 3 C-7 1 -3 1 0 1Z" fill="inherit"/><path d="M0 1 C3 7 9 8 8 3 C7 1 3 1 0 1Z" fill="inherit"/></g>
+      <rect x="-.8" y="-5" width="1.6" height="10" rx=".8" fill="#3f2a1a"/>
+    </symbol>
+  </defs>
+  <path d="M0 30 C80 24 160 32 240 28 C300 25 360 32 400 28 V70 H0Z" fill="url(#g)"/>
+  <!-- 花 -->
+  <g>
+    <g fill="#f9a8d4"><circle cx="20" cy="46" r="4"/><circle cx="26" cy="42" r="4"/><circle cx="32" cy="46" r="4"/><circle cx="26" cy="50" r="4"/></g><circle cx="26" cy="46" r="2.5" fill="#facc15"/>
+    <g fill="#fde047"><circle cx="80" cy="54" r="4"/><circle cx="86" cy="50" r="4"/><circle cx="92" cy="54" r="4"/><circle cx="86" cy="58" r="4"/></g><circle cx="86" cy="54" r="2.5" fill="#ea580c"/>
+    <g fill="#fff"><circle cx="140" cy="42" r="4"/><circle cx="146" cy="38" r="4"/><circle cx="152" cy="42" r="4"/><circle cx="146" cy="46" r="4"/></g><circle cx="146" cy="42" r="2.5" fill="#facc15"/>
+    <g fill="#c4b5fd"><circle cx="200" cy="52" r="4"/><circle cx="206" cy="48" r="4"/><circle cx="212" cy="52" r="4"/><circle cx="206" cy="56" r="4"/></g><circle cx="206" cy="52" r="2.5" fill="#facc15"/>
+    <g fill="#f9a8d4"><circle cx="262" cy="44" r="4"/><circle cx="268" cy="40" r="4"/><circle cx="274" cy="44" r="4"/><circle cx="268" cy="48" r="4"/></g><circle cx="268" cy="44" r="2.5" fill="#facc15"/>
+    <g fill="#fde047"><circle cx="322" cy="54" r="4"/><circle cx="328" cy="50" r="4"/><circle cx="334" cy="54" r="4"/><circle cx="328" cy="58" r="4"/></g><circle cx="328" cy="54" r="2.5" fill="#ea580c"/>
+    <g fill="#fff"><circle cx="374" cy="44" r="4"/><circle cx="380" cy="40" r="4"/><circle cx="386" cy="44" r="4"/><circle cx="380" cy="48" r="4"/></g><circle cx="380" cy="44" r="2.5" fill="#facc15"/>
+    <g fill="#86c95a"><path d="M50 70 l3 -12 l3 12z"/><path d="M116 70 l3 -14 l3 14z"/><path d="M176 70 l3 -12 l3 12z"/><path d="M236 70 l3 -14 l3 14z"/><path d="M300 70 l3 -12 l3 12z"/><path d="M356 70 l3 -14 l3 14z"/></g>
+  </g>
+  <!-- ちょうちょ -->
+  <g><use href="#bf" x="36" y="0" width="44" height="36" fill="url(#w1)"/><animateTransform attributeName="transform" type="translate" values="0 0; 20 -4; 40 2; 20 6; 0 0" dur="7s" repeatCount="indefinite"/></g>
+  <g><use href="#bf" x="168" y="2" width="38" height="32" fill="url(#w3)"/><animateTransform attributeName="transform" type="translate" values="0 0; -16 5; -30 -2; -12 -4; 0 0" dur="6s" repeatCount="indefinite"/></g>
+  <g><use href="#bf" x="296" y="0" width="44" height="36" fill="url(#w2)"/><animateTransform attributeName="transform" type="translate" values="0 0; 18 4; 30 -3; 12 -5; 0 0" dur="8s" repeatCount="indefinite"/></g>
+</svg>

@@ -212,10 +212,10 @@ AK.DESIGNS = {
   ],
   top: [
     { id: '', name: 'なし', price: 0, row: '' },
-    { id: 'forest', name: '森', price: 300, row: '🌲🌳🌲🌳🌲🌳🌲' },
-    { id: 'mountain', name: '山なみ', price: 400, row: '⛰️🏔️⛰️🏔️⛰️' },
+    { id: 'forest', name: '森', price: 300, art: 'img/scenery/forest.svg' },
+    { id: 'mountain', name: '山なみ', price: 400, art: 'img/scenery/mountain.svg' },
     { id: 'festival', name: 'お祭り', price: 500, row: '🏮🎏🏮🎏🏮🎏🏮' },
-    { id: 'rainbow', name: '虹', price: 800, row: '🌈' },
+    { id: 'rainbow', name: '虹', price: 800, art: 'img/scenery/rainbow.svg' },
     { id: 'moon', name: 'お月見', price: 800, row: '🌙⭐🌾⭐🌾⭐' },
   ],
   bottom: [
@@ -224,7 +224,7 @@ AK.DESIGNS = {
     { id: 'river', name: '小川', price: 400, art: 'img/scenery/river.svg' },
     { id: 'pasture', name: '牧場', price: 500, row: '🐄🐑🐔🐑🐄🐔🐑' },
     { id: 'tulip', name: 'チューリップ花壇', price: 500, row: '🌷🌷🌷🌷🌷🌷🌷' },
-    { id: 'butterfly', name: 'ちょうちょ', price: 600, row: '🦋🌼🦋🌼🦋🌼🦋' },
+    { id: 'butterfly', name: 'ちょうちょ', price: 600, art: 'img/scenery/butterfly.svg' },
   ],
   emblem: [
     { id: '', name: 'お城', price: 0, mark: '🏰' },
