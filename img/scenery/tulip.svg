@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 70" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="soil" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8d6e63"/><stop offset="1" stop-color="#5d4037"/></linearGradient>
+    <linearGradient id="r" x1="0" x2="1"><stop offset="0" stop-color="#fca5a5"/><stop offset=".5" stop-color="#ef4444"/><stop offset="1" stop-color="#991b1b"/></linearGradient>
+    <linearGradient id="y" x1="0" x2="1"><stop offset="0" stop-color="#fef08a"/><stop offset=".5" stop-color="#facc15"/><stop offset="1" stop-color="#a16207"/></linearGradient>
+    <linearGradient id="p" x1="0" x2="1"><stop offset="0" stop-color="#fbcfe8"/><stop offset=".5" stop-color="#ec4899"/><stop offset="1" stop-color="#9d174d"/></linearGradient>
+    <linearGradient id="w" x1="0" x2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#f1f5f9"/><stop offset="1" stop-color="#94a3b8"/></linearGradient>
+    <linearGradient id="v" x1="0" x2="1"><stop offset="0" stop-color="#ddd6fe"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#5b21b6"/></linearGradient>
+    <linearGradient id="lf" x1="0" x2="1"><stop offset="0" stop-color="#86efac"/><stop offset="1" stop-color="#15803d"/></linearGradient>
+    <symbol id="tl" viewBox="-10 -6 20 46">
+      <rect x="-1" y="6" width="2.4" height="32" fill="#3f8f2a"/>
+      <path d="M0 30 C-10 26 -9 14 -6 10 C-4 18 -2 24 0 30Z" fill="url(#lf)"/><path d="M1 34 C10 30 9 18 7 14 C5 22 3 28 1 34Z" fill="url(#lf)"/>
+      <path d="M-6 -2 L-3 2 L0 -4 L3 2 L6 -2 L6 6 C6 11 -6 11 -6 6Z" fill="inherit"/>
+      <path d="M-3 0 C-3 6 -1 9 0 9" stroke="#fff" stroke-width="1" fill="none" opacity=".6"/>
+    </symbol>
+  </defs>
+  <rect width="400" height="70" fill="#ecfccb"/>
+  <!-- 花壇（レンガのふち） -->
+  <rect x="0" y="40" width="400" height="22" fill="url(#soil)"/>
+  <g fill="#b45332" stroke="#e7d3c0" stroke-width="1"><rect x="0" y="60" width="40" height="10"/><rect x="40" y="60" width="40" height="10"/><rect x="80" y="60" width="40" height="10"/><rect x="120" y="60" width="40" height="10"/><rect x="160" y="60" width="40" height="10"/><rect x="200" y="60" width="40" height="10"/><rect x="240" y="60" width="40" height="10"/><rect x="280" y="60" width="40" height="10"/><rect x="320" y="60" width="40" height="10"/><rect x="360" y="60" width="40" height="10"/></g>
+  <g>
+    <animateTransform attributeName="transform" type="skewX" values="0;1.5;0;-1.5;0" dur="5s" repeatCount="indefinite"/>
+    <use href="#tl" x="6" y="8" width="22" height="50" fill="url(#r)"/><use href="#tl" x="36" y="12" width="22" height="50" fill="url(#y)"/><use href="#tl" x="66" y="8" width="22" height="50" fill="url(#p)"/><use href="#tl" x="96" y="12" width="22" height="50" fill="url(#w)"/>
+    <use href="#tl" x="126" y="8" width="22" height="50" fill="url(#v)"/><use href="#tl" x="156" y="12" width="22" height="50" fill="url(#r)"/><use href="#tl" x="186" y="8" width="22" height="50" fill="url(#y)"/><use href="#tl" x="216" y="12" width="22" height="50" fill="url(#p)"/>
+    <use href="#tl" x="246" y="8" width="22" height="50" fill="url(#w)"/><use href="#tl" x="276" y="12" width="22" height="50" fill="url(#v)"/><use href="#tl" x="306" y="8" width="22" height="50" fill="url(#r)"/><use href="#tl" x="336" y="12" width="22" height="50" fill="url(#y)"/><use href="#tl" x="366" y="8" width="22" height="50" fill="url(#p)"/>
+  </g>
+</svg>
