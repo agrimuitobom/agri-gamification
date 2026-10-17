@@ -97,6 +97,7 @@
     '🍎': 'red-apple',
     '❤': 'red-heart',
     '❓': 'red-question-mark',
+    '🍞': 'bread',
     '🍠': 'roasted-sweet-potato',
     '🪨': 'rock',
     '🌹': 'rose',
