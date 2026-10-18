@@ -314,22 +314,57 @@ window.AK = window.AK || {};
     return 'N';
   };
   /** 分野 field の正解で手に入るアイテムを1つ抽選（コンボが高いほどレアが出やすい） */
-  AK.rollDrop = function (field, combo = 0) {
-    const rar = AK.rollRarity(combo);
+  AK.rollDrop = function (field, combo = 0, forceRar = null, onlyFacility = false) {
+    const rar = forceRar || AK.rollRarity(combo);
     // 作物アイテムがある分野から選ぶ（共通の問題なら、どこかの分野の種が出る）
     const cropFields = Object.keys(AK.FIELDS).filter((k) => Object.values(AK.ITEMS).some((it) => it.type === 'crop' && it.field === k));
     const f = cropFields.includes(field) ? field : AK.rand(cropFields);
-    const seedFirst = Math.random() < 0.72;
+    const seedFirst = !onlyFacility && Math.random() < 0.72;
     const ids = Object.keys(AK.ITEMS);
     const seeds = (r) => ids.filter((id) => AK.ITEMS[id].type === 'crop' && AK.ITEMS[id].field === f && AK.ITEMS[id].rarity === r);
     const facs = (r) => ids.filter((id) => AK.ITEMS[id].type !== 'crop' && !AK.ITEMS[id].noDrop && AK.ITEMS[id].rarity === r);
     for (let i = RAR_ORDER.indexOf(rar); i < RAR_ORDER.length; i++) {
       const r = RAR_ORDER[i];
       let pool = seedFirst ? seeds(r) : facs(r);
-      if (!pool.length) pool = seedFirst ? facs(r) : seeds(r);
+      if (!pool.length && !onlyFacility) pool = seedFirst ? facs(r) : seeds(r);
       if (pool.length) return AK.rand(pool);
     }
     return 'tomato';
+  };
+
+  // ---------- 鑑定ガチャ・売却・合成 ----------
+  AK.GACHA_COST = 200;
+  AK.GACHA_RATES = [['SSR', 4], ['SR', 16], ['R', 35], ['N', 45]]; // ふつうのドロップよりレアが出やすい
+  AK.rollGacha = function () {
+    let r = Math.random() * 100;
+    let rar = 'N';
+    for (const [k, v] of AK.GACHA_RATES) if ((r -= v) < 0) { rar = k; break; }
+    const id = AK.rollDrop('mix', 0, rar);
+    return { id, isNew: AK.addItem(id) };
+  };
+  AK.SELL_PRICE = { N: 30, R: 80, SR: 250, SSR: 600 };
+  AK.canTrade = (id) => AK.ITEMS[id] && AK.ITEMS[id].type !== 'crop' && !AK.ITEMS[id].noDrop;
+  AK.sellItem = function (id, n = 1) {
+    if (!AK.canTrade(id) || (AK.S.inv[id] || 0) < n) return 0;
+    for (let k = 0; k < n; k++) AK.useItem(id);
+    const coins = AK.SELL_PRICE[AK.ITEMS[id].rarity] * n;
+    AK.addCoins(coins);
+    AK.save();
+    AK.emit('change');
+    return coins;
+  };
+  AK.SYNTH_NEED = 3;
+  AK.nextRarity = (r) => RAR_ORDER[RAR_ORDER.indexOf(r) - 1] || null; // RAR_ORDER は SSR が先頭
+  /** 同じ施設・かざり3つ → ひとつ上のレア度の施設・かざりを1つ */
+  AK.synthItem = function (id) {
+    const it = AK.ITEMS[id], up = it && AK.nextRarity(it.rarity);
+    if (!AK.canTrade(id) || !up || (AK.S.inv[id] || 0) < AK.SYNTH_NEED) return null;
+    for (let k = 0; k < AK.SYNTH_NEED; k++) AK.useItem(id);
+    const nid = AK.rollDrop('mix', 0, up, true);
+    const drop = { id: nid, isNew: AK.addItem(nid) };
+    AK.save();
+    AK.emit('change');
+    return drop;
   };
 
   // ---------- デイリーミッション ----------

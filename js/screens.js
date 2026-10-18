@@ -26,7 +26,43 @@
     if (opts.place && S.inv[id]) {
       buttons.push({ label: '🏰 王国に置く', cls: 'primary', onClick: () => { AK.Farm.selected = id; AK.go('farm'); } });
     }
-    AK.modal({
+    // 施設・かざり：売却と合成（置き場所が限られていて余りがちなので）
+    let trade = null, closeIt = () => {};
+    if (opts.place && AK.canTrade(id) && S.inv[id]) {
+      const n = S.inv[id], price = AK.SELL_PRICE[i.rarity], up = AK.nextRarity(i.rarity);
+      const sell = (k) => {
+        const go = () => {
+          const coins = AK.sellItem(id, k);
+          if (!coins) return;
+          closeIt();
+          AK.Sound.play('coin');
+          AK.toast(`💰 ${i.name}×${k} を売って <b>+${coins}コイン</b>`);
+          AK.refresh();
+        };
+        if (RAR_ORDER[i.rarity] >= 2 || k > 1) AK.confirm(`${i.emoji} ${i.name}×${k} を ${price * k}コインで売りますか？`, go);
+        else go();
+      };
+      trade = h('div', { class: 'trade-box' },
+        h('div', { class: 'trade-row' },
+          h('div', {}, h('b', {}, '💰 売る'), h('div', { class: 'small' }, `1つ ${price}コイン`)),
+          h('div', { class: 'trade-btns' },
+            h('button', { class: 'btn small gold', onclick: () => sell(1) }, '1つ売る'),
+            n > 1 ? h('button', { class: 'btn small', onclick: () => sell(n - 1) }, `1つ残して売る（${n - 1}）`) : null)),
+        up ? h('div', { class: 'trade-row' },
+          h('div', {}, h('b', {}, '⚗️ 合成'), h('div', { class: 'small' }, `${AK.SYNTH_NEED}つ → ${up}の施設・かざり1つ`)),
+          h('button', {
+            class: 'btn small primary', disabled: n < AK.SYNTH_NEED,
+            onclick: () => {
+              const drop = AK.synthItem(id);
+              if (!drop) return;
+              closeIt();
+              const box = h('div', { class: 'reward' });
+              AK.modal({ title: '⚗️ 合成成功！', body: h('div', {}, h('p', { class: 'center' }, `${i.emoji}×${AK.SYNTH_NEED} を合成して…`), box), buttons: [{ label: 'やったー！', cls: 'primary', onClick: () => AK.refresh() }] });
+              AK.showDrops(box, [drop]);
+            },
+          }, n < AK.SYNTH_NEED ? `あと${AK.SYNTH_NEED - n}つ` : '合成する！')) : null);
+    }
+    closeIt = AK.modal({
       cls: 'item-modal',
       body: h('div', {},
         h('div', { class: `big-emoji r-${i.rarity}${i.gold ? ' gold' : ''}` }, i.emoji),
@@ -35,7 +71,8 @@
         i.effectText ? h('div', { class: 'effect' }, '✨ 効果：' + i.effectText) : null,
         h('p', { class: 'desc' }, i.desc),
         info.map((t) => h('div', { class: 'info' }, t)),
-        d ? h('div', { class: 'info dim' }, `入手 ${d.got}回${i.type === 'crop' ? `／収穫 ${d.h}回` : ''}　所持 ${S.inv[id] || 0}`) : null),
+        d ? h('div', { class: 'info dim' }, `入手 ${d.got}回${i.type === 'crop' ? `／収穫 ${d.h}回` : ''}　所持 ${S.inv[id] || 0}`) : null,
+        trade),
       buttons,
     });
   };
@@ -92,7 +129,12 @@
       h('div', { class: 'wc-icon' }, '📕'),
       h('div', {}, h('div', { class: 'wc-title' }, `復習ノート（今すぐ ${reviewQs.length}問／全 ${allReview}問）`),
         h('div', { class: 'wc-sub' }, reviewQs.length ? '間隔をあけて3回正解すると卒業！克服ボーナスでレア率UP'
-          : allReview ? `次の復習まで あと${AK.fmtWait(nextIn || 0)}（間隔をあけると記憶に残る！）` : '間違えた問題がここにたまります'))));
+          : allReview ? `次の復習まで あと${AK.fmtWait(nextIn || 0)}（間隔をあけると記憶に残る！）` : '間違えた問題がここにたまります'))),
+      h('button', { class: 'wide-card gacha', disabled: S.coins < AK.GACHA_COST, onclick: () => AK.playGacha() },
+        h('div', { class: 'wc-icon' }, '🎰'),
+        h('div', {}, h('div', { class: 'wc-title' }, `鑑定ガチャ（💰${AK.GACHA_COST}）`),
+          h('div', { class: 'wc-sub' }, S.coins < AK.GACHA_COST ? `コインが足りません（所持 ${S.coins}）`
+            : '1問正解でカプセルが開く！SR・SSRが出やすい（はずれでもコイン半分もどる）'))));
 
     const b = AK.bossToday();
     const boss = h('button', {
@@ -106,6 +148,58 @@
       h('div', { class: 'bc-sub' }, `HP ${b.hp}｜${b.field === 'mix' ? '全分野' : AK.FIELDS[b.field].name}の問題で攻撃！ハート3つ`)));
 
     v.append(h('div', { class: 'screen' }, boss, ms, train, challenge));
+  };
+
+  /** 鑑定ガチャ：コインを払って1問に挑戦。正解でカプセルが開く */
+  AK.playGacha = function () {
+    const S = AK.S;
+    if (S.coins < AK.GACHA_COST) { AK.toast('コインが足りません'); return; }
+    const rates = AK.GACHA_RATES.map(([r, p]) => `${r} ${p}%`).join('／');
+    AK.modal({
+      title: '🎰 鑑定ガチャ',
+      body: h('div', { class: 'center' },
+        h('div', { class: 'gacha-machine' }, '🎰'),
+        h('p', {}, `💰${AK.GACHA_COST}コインで1回。出題される`, h('b', {}, '1問に正解'), 'するとカプセルが開くよ！'),
+        h('p', { class: 'small' }, `出る確率：${rates}`),
+        h('p', { class: 'small' }, `まちがえたらカプセルは開かず、${AK.GACHA_COST / 2}コインだけもどってくる。`)),
+      buttons: [
+        { label: 'やめる' },
+        {
+          label: `💰${AK.GACHA_COST} で回す！`, cls: 'primary',
+          onClick: () => {
+            if (S.coins < AK.GACHA_COST) return;
+            S.coins -= AK.GACHA_COST;
+            AK.save();
+            AK.emit('change');
+            setTimeout(() => AK.Quiz.start({
+              mode: 'trouble', field: 'mix', title: '🎰 鑑定ガチャ',
+              intro: '正解するとカプセルが開く！よく読んで答えよう。',
+              failNote: `カプセルは開かなかった…。${AK.GACHA_COST / 2}コインがもどってきます。`,
+              doneLabel: '結果を見る ▶',
+              onDone(ok) {
+                if (!ok) {
+                  AK.addCoins(AK.GACHA_COST / 2);
+                  AK.save();
+                  AK.toast(`🎰 はずれ… ${AK.GACHA_COST / 2}コインがもどってきた`);
+                  AK.refresh();
+                  return;
+                }
+                const drop = AK.rollGacha();
+                AK.track('gacha');
+                AK.save();
+                const box = h('div', { class: 'reward' });
+                AK.modal({
+                  title: '🎰 カプセルオープン！', body: box,
+                  buttons: [{ label: 'とじる', onClick: () => AK.refresh() },
+                    { label: 'もう1回！', cls: 'primary', disabled: AK.S.coins < AK.GACHA_COST, onClick: () => { AK.refresh(); setTimeout(AK.playGacha, 250); } }],
+                });
+                AK.showDrops(box, [drop]);
+              },
+            }), 250);
+          },
+        },
+      ],
+    });
   };
 
   function claimMission(m) {

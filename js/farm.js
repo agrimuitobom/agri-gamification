@@ -188,7 +188,7 @@
     const sel = (id) => () => { Farm.selected = Farm.selected === id ? null : id; AK.Sound.play('tap'); AK.refresh(); };
     const bar = h('div', { class: 'palette' },
       h('button', { class: 'pal-item tool' + (Farm.selected === 'pickup' ? ' sel' : ''), onclick: sel('pickup') },
-        h('div', { class: 'pe' }, '📦'), h('div', { class: 'pn' }, 'しまう')));
+        h('div', { class: 'pe' }, '📦'), h('div', { class: 'pn' }, 'しまう・抜く')));
     ids.forEach((id) => {
       const i = AK.ITEMS[id];
       bar.append(h('button', { class: `pal-item r-${i.rarity}${i.gold ? ' gold' : ''}${Farm.selected === id ? ' sel' : ''}`, onclick: sel(id) },
@@ -199,7 +199,7 @@
     if (!ids.length) {
       hint = h('div', { class: 'pal-empty' }, 'アイテムがありません。',
         h('button', { class: 'btn small primary', onclick: () => AK.go('quiz') }, '📝 問題を解いてゲット！'));
-    } else if (Farm.selected === 'pickup') hint = h('div', { class: 'pal-hint' }, '📦 しまいたいものをタップ（施設・かざりは倉庫にもどる）');
+    } else if (Farm.selected === 'pickup') hint = h('div', { class: 'pal-hint' }, '📦 タップしたものを片づける（施設・かざり・果樹は倉庫にもどる／野菜などは抜く）');
     else if (Farm.selected) hint = h('div', { class: 'pal-hint' }, `${AK.ITEMS[Farm.selected].emoji} 置きたいマスをタップ！`);
     else hint = h('div', { class: 'pal-hint' }, '👇 アイテムを選んで、空いているマスに置こう');
     return h('div', { class: 'palette-wrap' }, hint, bar);
@@ -275,7 +275,13 @@
     if (sel === 'pickup') {
       if (!t) return;
       const i = it(t);
-      if (i.type === 'crop') {
+      if (i.type === 'crop' && i.perennial) {
+        // 果樹は掘り上げて苗にもどせる（植えかえ）。育ち具合はリセット
+        AK.confirm(`🌳 ${i.emoji} ${i.name}の木を掘り上げますか？<br><small>苗として倉庫にもどり、好きな場所に植えかえられます（育ち具合は最初から）</small>`, () => {
+          delete S.tiles[k]; AK.giveBack(t.id); AK.Sound.play('place'); AK.save(); AK.refresh();
+          AK.toast(`🌳 ${i.name}の苗を倉庫にもどしました。植えたい場所をタップしよう`);
+        });
+      } else if (i.type === 'crop') {
         AK.confirm(`${i.emoji} ${i.name}を抜きますか？<br><small>（植えた作物はなくなります）</small>`, () => {
           delete S.tiles[k]; AK.save(); AK.refresh();
         });
@@ -319,7 +325,7 @@
         AK.save(); AK.refresh();
         return;
       }
-      AK.toast(`${i.emoji} ${i.name}：収穫まであと ${AK.fmtTime((needTime(t) - t.p) / speedOf(k))}${nearLv(k, 'speed') ? `<br><small>💦 スプリンクラー効果で ${AK.upgMult(nearLv(k, 'speed'))}倍速！</small>` : ''}`);
+      AK.toast(`${i.emoji} ${i.name}：収穫まであと ${AK.fmtTime((needTime(t) - t.p) / speedOf(k))}${nearLv(k, 'speed') ? `<br><small>💦 スプリンクラー効果で ${AK.upgMult(nearLv(k, 'speed'))}倍速！</small>` : ''}${i.perennial ? '<br><small>🌳 植えかえたいときは下の「📦しまう・抜く」から</small>' : ''}`);
       return;
     }
     showObjInfo(k);

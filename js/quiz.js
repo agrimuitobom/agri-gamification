@@ -331,10 +331,10 @@
         : `📕 復習 ${AK.reviewStage(q.id)}/${AK.REVIEW_GOAL} 回目クリア。${AK.fmtWait(AK.REVIEW_WAIT[AK.reviewStage(q.id)])}後にもう一度出題されます`));
     }
     if (!ok && !s.boss) fb.append(h('div', { class: 'note' }, s.mode === 'review' ? '📕 復習ノートの最初（0/3）からやり直し' : '📕 復習ノートに追加しました'));
-    if (s.mode === 'trouble' && !ok) fb.append(h('div', { class: 'note' }, '病害虫はまだ残っている…。もう一度タップして再挑戦しよう！'));
+    if (s.mode === 'trouble' && !ok) fb.append(h('div', { class: 'note' }, s.opts.failNote || '病害虫はまだ残っている…。もう一度タップして再挑戦しよう！'));
 
     let label = '次の問題 ▶';
-    if (s.mode === 'trouble') label = '王国にもどる';
+    if (s.mode === 'trouble') label = s.opts.doneLabel || '王国にもどる';
     else if (s.boss) label = s.boss.hp <= 0 ? '🏆 報酬を受け取る' : s.hearts <= 0 ? '結果を見る' : '次の攻撃 ⚔️';
     else if (s.queue && s.idx >= s.total - 1) label = '結果を見る ▶';
     else if (s.mode === 'train' && (s.idx + 1) % TRAIN_SET === 0) label = '10問の結果を見る ▶';
