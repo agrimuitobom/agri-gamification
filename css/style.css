@@ -121,8 +121,10 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .farm-head { display: flex; align-items: baseline; justify-content: space-between; }
 .kingdom-name { font-weight: 800; font-size: 18px; color: var(--green-d); text-shadow: 0 2px 0 #fff; }
 .farm-meta { font-size: 12px; color: var(--sub); font-weight: 800; }
-.farm-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-.field-area { width: min(100%, max(300px, calc(100dvh - 400px))); margin: 0 auto; }
+.farm-actions { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.farm-actions::-webkit-scrollbar { display: none; }
+.farm-actions .btn { flex-shrink: 0; white-space: nowrap; }
+.field-area { width: min(100%, max(280px, calc(100dvh - 400px))); margin: 0 auto; }
 .field-wrap {
   width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
   background: linear-gradient(#7cb342, #689f38);
@@ -160,18 +162,18 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .tile.obj.r-SSR { background: radial-gradient(circle, #fff8c4, #aed581); }
 
 .palette-wrap {
-  position: sticky; bottom: 0; margin: 0 -10px; padding: 8px 10px 10px;
+  position: sticky; bottom: 0; margin: 0 -10px; padding: 6px 10px 8px; z-index: 2;
   background: rgba(255, 255, 255, .95); border-radius: 18px 18px 0 0; box-shadow: 0 -4px 12px rgba(0, 0, 0, .08);
   margin-top: auto;
 }
-.pal-hint { font-size: 12px; color: var(--sub); font-weight: 800; margin-bottom: 6px; }
+.pal-hint { font-size: 12px; color: var(--sub); font-weight: 800; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pal-empty { font-size: 13px; display: flex; align-items: center; gap: 8px; justify-content: center; padding: 8px 0; }
 .palette { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: thin; }
 .pal-item {
-  flex: 0 0 72px; height: 84px; border-radius: 12px; border: 3px solid var(--r-N); background: #fff;
+  flex: 0 0 64px; height: 72px; border-radius: 12px; border: 3px solid var(--r-N); background: #fff;
   display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 2px;
 }
-.pal-item .pe { font-size: 30px; line-height: 1.1; }
+.pal-item .pe { font-size: 26px; line-height: 1.1; }
 .pal-item .pn { font-size: 10px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .pal-item .pc { position: absolute; top: -6px; right: -6px; background: var(--ink); color: #fff; font-size: 11px; border-radius: 99px; padding: 1px 6px; }
 .pal-item.tool { border-color: #d1d5db; background: #f3f4f6; }
@@ -453,9 +455,13 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 
 /* ============ 旬 ============ */
 .season-bar {
-  background: rgba(255, 247, 237, .82); border: 2px solid #fdba74; border-radius: 12px; padding: 6px 10px;
+  background: rgba(255, 247, 237, .82); border: 2px solid #fdba74; border-radius: 12px; padding: 6px 28px 6px 10px;
   font-size: 12px; line-height: 1.5; backdrop-filter: blur(2px);
+  width: 100%; text-align: left; font-family: inherit; color: inherit; position: relative;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.season-bar.open { white-space: normal; }
+.season-bar .sb-toggle { position: absolute; right: 8px; top: 6px; color: #c2410c; font-size: 11px; }
 .season-bar b { color: #c2410c; }
 .shun {
   position: absolute; background: #ea580c; color: #fff; font-weight: 800; border-radius: 6px;

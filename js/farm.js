@@ -166,9 +166,17 @@
       scenery(bottom, 'bottom'));
     const month = new Date().getMonth() + 1;
     const shun = Object.keys(AK.ITEMS).filter((id) => AK.inSeason(id)).map((id) => AK.ITEMS[id].name);
-    const season = h('div', { class: 'season-bar' },
-      h('b', {}, `🗓️ ${month}月の旬`), ` ${shun.join('・')}`,
-      h('span', { class: 'small' }, '（成長1.5倍・コイン1.5倍）'));
+    // 旬の帯：ふだんは1行（数種類＋ほか○種）、タップで全部ひらく
+    const SHOW = 3, more = shun.length - SHOW;
+    const season = h('button', {
+      class: 'season-bar' + (Farm.seasonOpen ? ' open' : ''),
+      onclick: () => { Farm.seasonOpen = !Farm.seasonOpen; AK.refresh(); },
+    },
+    h('b', {}, `🗓️ ${month}月の旬`),
+    Farm.seasonOpen || more <= 0
+      ? [` ${shun.join('・')}`, h('span', { class: 'small' }, '（成長1.5倍・コイン1.5倍）')]
+      : [` ${shun.slice(0, SHOW).join('・')} `, h('span', { class: 'small' }, `ほか${more}種`)],
+    more > 0 ? h('span', { class: 'sb-toggle' }, Farm.seasonOpen ? '▲' : '▼') : null);
     container.append(h('div', { class: 'farm-screen sky-' + (D.sky || 'default') }, head, actions, season, field, renderPalette()));
     container.querySelector('.palette').scrollLeft = palScroll;
     Farm.fit();
