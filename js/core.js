@@ -110,7 +110,11 @@ window.AK = window.AK || {};
   AK.UPG_COST = { N: [150, 400], R: [300, 800], SR: [600, 1500], SSR: [1200, 3000] };
   AK.isUpgradable = (id) => ['speed', 'coin', 'xp', 'guard', 'shop', 'castle'].includes((AK.ITEMS[id] || {}).effect);
   AK.upgLv = (id) => (AK.S && AK.S.upg[id]) || 1;
-  AK.upgCost = (id) => { const lv = AK.upgLv(id); return lv >= AK.UPG_MAX ? null : AK.UPG_COST[AK.ITEMS[id].rarity][lv - 1]; };
+  AK.UPG_COST_EFFECT = { guard: [300, 5000] }; // かかしは強力なので Lv3 はかなり高い
+  AK.upgCost = (id) => {
+    const lv = AK.upgLv(id), it = AK.ITEMS[id];
+    return lv >= AK.UPG_MAX ? null : (AK.UPG_COST_EFFECT[it.effect] || AK.UPG_COST[it.rarity])[lv - 1];
+  };
   AK.upgRange = (id) => (AK.upgLv(id) >= 3 ? 2 : 1); // Lv3 で 5×5 マスに
   AK.guardCut = (lv) => (lv >= 3 ? 0.5 : lv >= 2 ? 0.3 : 0); // かかしLv2以上：範囲外の病害虫も減る
   AK.upgMult = (lv) => 1.5 + 0.25 * (lv - 1); // 1.5 → 1.75 → 2.0
