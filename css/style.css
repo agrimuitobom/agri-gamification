@@ -210,6 +210,8 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 }
 .wide-card.kantei { background: linear-gradient(135deg, #f59e0b, #d97706); }
 .wide-card.review { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.wide-card.gacha { background: linear-gradient(135deg, #ec4899, #8b5cf6); }
+.wide-card.gacha:disabled { background: linear-gradient(135deg, #9ca3af, #6b7280); opacity: 1; }
 .wc-icon { font-size: 40px; }
 .wc-title { font-size: 17px; font-weight: 800; }
 .wc-sub { font-size: 12px; opacity: .95; }
@@ -701,8 +703,6 @@ img.emo {
 .trade-btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 
 /* 鑑定ガチャ */
-.wide-card.gacha { background: linear-gradient(135deg, #fdf2f8, #fef3c7); border-color: #f9a8d4; }
-.wide-card.gacha:disabled { opacity: .55; }
 .gacha-machine { font-size: 72px; line-height: 1.1; animation: gacha-shake 1.2s ease-in-out infinite; }
 .gacha-machine img.emo { width: 1em; height: 1em; }
 @keyframes gacha-shake { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-6deg); } 40% { transform: rotate(6deg); } 60% { transform: rotate(-3deg); } 80% { transform: rotate(3deg); } }
