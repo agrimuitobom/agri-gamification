@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="body" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#ffffff"/><stop offset=".65" stop-color="#f3f0ea"/><stop offset="1" stop-color="#cfc8bb"/></radialGradient>
+    <linearGradient id="wing" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f7f4ee"/><stop offset="1" stop-color="#d6cfc1"/></linearGradient>
+    <linearGradient id="tail" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#fafafa"/><stop offset="1" stop-color="#cfc8bb"/></linearGradient>
+    <radialGradient id="comb" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#ff6b6b"/><stop offset="1" stop-color="#c62828"/></radialGradient>
+    <linearGradient id="beak" x1="0" x2="1"><stop offset="0" stop-color="#ffd54f"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>
+    <radialGradient id="shadow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".3"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="62" cy="115" rx="34" ry="6" fill="url(#shadow)"/>
+  <!-- 脚 -->
+  <g stroke="#f59e0b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M54 92 L52 112 M52 112 L44 114 M52 112 L58 115 M52 112 L50 105"/>
+    <path d="M70 92 L72 112 M72 112 L64 114 M72 112 L80 114 M72 112 L74 105"/>
+  </g>
+  <!-- しっぽ -->
+  <path d="M30 70 Q8 54 14 28 Q22 44 34 50 Q24 36 30 18 Q38 40 46 54 Z" fill="url(#tail)" stroke="#bdb5a6" stroke-width="1.5"/>
+  <path d="M18 34 Q24 50 36 58" stroke="#bdb5a6" stroke-width="1.5" fill="none"/>
+  <!-- 体 -->
+  <path d="M28 66 Q26 44 50 44 Q66 44 76 50 L80 34 Q82 20 92 18 Q104 18 106 32 Q108 44 98 56 Q100 92 62 96 Q30 96 28 66 Z" fill="url(#body)" stroke="#bdb5a6" stroke-width="1.5"/>
+  <!-- 羽 -->
+  <path d="M40 64 Q48 54 66 60 Q76 66 70 80 Q58 90 44 80 Q38 74 40 64 Z" fill="url(#wing)" stroke="#bdb5a6" stroke-width="1.5"/>
+  <path d="M46 70 Q56 72 66 68 M47 77 Q56 79 64 75" stroke="#c8c0b0" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- とさか -->
+  <path d="M84 20 Q82 10 89 10 Q90 4 96 6 Q100 2 104 8 Q110 9 106 17 Q100 20 84 20 Z" fill="url(#comb)"/>
+  <!-- くちばし -->
+  <path d="M105 30 L118 34 L105 38 Z" fill="url(#beak)" stroke="#d97706" stroke-width="1"/>
+  <!-- 肉垂 -->
+  <path d="M103 39 Q108 40 107 47 Q105 52 101 48 Q99 43 103 39 Z" fill="url(#comb)"/>
+  <!-- 目 -->
+  <circle cx="96" cy="28" r="4" fill="#212121"/>
+  <circle cx="97.4" cy="26.6" r="1.4" fill="#fff"/>
+  <ellipse cx="89" cy="34" rx="4" ry="2.5" fill="#ff8a80" opacity=".5"/>
+</svg>

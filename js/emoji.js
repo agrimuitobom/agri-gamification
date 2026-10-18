@@ -83,7 +83,7 @@
     '✅': 'check-mark-button',
     '🍒': 'cherries',
     '🌸': 'cherry-blossom',
-    '🐔': 'chicken',
+    '🐔': 'crops/chicken.svg', // オリジナルSVG（全身のニワトリ）
     '📋': 'clipboard',
     '📕': 'closed-book',
     '☁': 'cloud',
@@ -173,7 +173,7 @@
     '🍊': 'tangerine',
     '🍵': 'teacup-without-handle',
     '🍅': 'tomato',
-    '🚜': 'tractor',
+    '🚜': 'crops/tractor.svg', // オリジナルSVG
     '🏆': 'trophy',
     '🌷': 'tulip',
     '🌋': 'volcano',
