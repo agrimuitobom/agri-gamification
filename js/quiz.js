@@ -119,6 +119,7 @@
     s = null;
     AK.save();
     AK.emit('change');
+    if (AK.refresh) AK.refresh(); // 後ろの画面（ボス討伐・ミッション進捗など）を最新にする
     if (o && o.onClose) o.onClose();
   }
 
