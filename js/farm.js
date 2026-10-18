@@ -35,7 +35,9 @@
   }
   const isReady = (t) => isCrop(t) && t.bug == null && t.p >= needTime(t);
   const speedOf = (k) => effMult(k, 'speed') * (AK.S.tiles[k] && AK.inSeason(AK.S.tiles[k].id) ? 1.5 : 1);
-  Farm.expandCost = (land) => 50 + 50 * (land - 3) ** 2;
+  // 領土拡張の費用（4×4→5×5 から 9×9→10×10 まで）。広くなるほど大きく上がる
+  const EXPAND_COST = [300, 800, 2000, 4000, 7000, 12000];
+  Farm.expandCost = (land) => EXPAND_COST[land - 4] ?? EXPAND_COST[EXPAND_COST.length - 1];
 
   Farm.readyCount = () => Object.values(AK.S.tiles).filter((t) => isReady(t) || (isCrop(t) && t.bug != null)).length;
 
