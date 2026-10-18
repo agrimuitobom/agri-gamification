@@ -134,7 +134,7 @@
         h('div', { class: 'wc-icon' }, '🎰'),
         h('div', {}, h('div', { class: 'wc-title' }, `鑑定ガチャ（💰${AK.GACHA_COST}）`),
           h('div', { class: 'wc-sub' }, S.coins < AK.GACHA_COST ? `コインが足りません（所持 ${S.coins}）`
-            : '1問正解でカプセルが開く！SR・SSRが出やすい（はずれでもコイン半分もどる）'))));
+            : '1問正解でカプセルが開く！SR・SSRが出やすい（まちがえたらコインは返ってこない）'))));
 
     const b = AK.bossToday();
     const boss = h('button', {
@@ -161,7 +161,7 @@
         h('div', { class: 'gacha-machine' }, '🎰'),
         h('p', {}, `💰${AK.GACHA_COST}コインで1回。出題される`, h('b', {}, '1問に正解'), 'するとカプセルが開くよ！'),
         h('p', { class: 'small' }, `出る確率：${rates}`),
-        h('p', { class: 'small' }, `まちがえたらカプセルは開かず、${AK.GACHA_COST / 2}コインだけもどってくる。`)),
+        h('p', { class: 'small' }, 'まちがえたらカプセルは開かず、コインももどってこないぞ！')),
       buttons: [
         { label: 'やめる' },
         {
@@ -174,13 +174,11 @@
             setTimeout(() => AK.Quiz.start({
               mode: 'trouble', field: 'mix', title: '🎰 鑑定ガチャ',
               intro: '正解するとカプセルが開く！よく読んで答えよう。',
-              failNote: `カプセルは開かなかった…。${AK.GACHA_COST / 2}コインがもどってきます。`,
+              failNote: 'カプセルは開かなかった…。解説を読んで、次こそ正解しよう！',
               doneLabel: '結果を見る ▶',
               onDone(ok) {
                 if (!ok) {
-                  AK.addCoins(AK.GACHA_COST / 2);
-                  AK.save();
-                  AK.toast(`🎰 はずれ… ${AK.GACHA_COST / 2}コインがもどってきた`);
+                  AK.toast('🎰 はずれ… カプセルは開かなかった');
                   AK.refresh();
                   return;
                 }
