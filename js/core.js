@@ -112,6 +112,7 @@ window.AK = window.AK || {};
   AK.upgLv = (id) => (AK.S && AK.S.upg[id]) || 1;
   AK.upgCost = (id) => { const lv = AK.upgLv(id); return lv >= AK.UPG_MAX ? null : AK.UPG_COST[AK.ITEMS[id].rarity][lv - 1]; };
   AK.upgRange = (id) => (AK.upgLv(id) >= 3 ? 2 : 1); // Lv3 で 5×5 マスに
+  AK.guardCut = (lv) => (lv >= 3 ? 0.5 : lv >= 2 ? 0.3 : 0); // かかしLv2以上：範囲外の病害虫も減る
   AK.upgMult = (lv) => 1.5 + 0.25 * (lv - 1); // 1.5 → 1.75 → 2.0
   AK.effectTextFor = function (id, lv) {
     const it = AK.ITEMS[id], area = lv >= 3 ? '周囲24マス（5×5）' : '周囲8マス';
@@ -119,7 +120,7 @@ window.AK = window.AK || {};
       case 'speed': return `${area}の作物の成長が${AK.upgMult(lv)}倍速`;
       case 'coin': return `${area}の収穫コイン${AK.upgMult(lv)}倍`;
       case 'xp': return `${area}の収穫XP${AK.upgMult(lv)}倍`;
-      case 'guard': return `${area}で病害虫が発生しなくなる`;
+      case 'guard': return `${area}で病害虫が発生しなくなる` + (lv >= 2 ? `＋王国全体の病害虫の発生${AK.guardCut(lv) * 100}%減` : '');
       case 'shop': return `王国全体の収穫コイン+${20 + 10 * (lv - 1)}%（3つまで重複）`;
       case 'castle': return `王国全体の収穫コイン・XP +${30 + 10 * (lv - 1)}%`;
       default: return it.effectText || '';

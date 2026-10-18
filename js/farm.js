@@ -47,6 +47,8 @@
     if (dt <= 0) return false;
     const online = dt < 5; // オフライン中は病害虫が発生しない
     let changed = false;
+    const guardLv = Math.max(0, ...buildingsOf('guard').map(([, b]) => AK.upgLv(b.id)));
+    const bugRate = 1 - AK.guardCut(guardLv);
     for (const [k, t] of Object.entries(S.tiles)) {
       if (!isCrop(t) || t.bug != null) continue;
       const need = needTime(t);
@@ -55,7 +57,7 @@
       if (t.p >= need) changed = true;
       else if (online) {
         const ratio = t.p / need;
-        if (ratio > 0.15 && ratio < 0.9 && !nearLv(k, 'guard') && Math.random() < dt / 110) {
+        if (ratio > 0.15 && ratio < 0.9 && !nearLv(k, 'guard') && Math.random() < dt / 110 * bugRate) {
           t.bug = Math.floor(Math.random() * BUGS.length);
           changed = true;
           if (Farm.tileEls[k]) AK.Sound.play('bug');
