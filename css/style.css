@@ -669,3 +669,19 @@ img.emo {
 .set-item.r-SSR { border-color: var(--r-SSR); background: #fff8d6; }
 .perfect-bonus { font-weight: 800; color: #b45309; font-size: 18px; animation: pulse .8s infinite; }
 .res-btns.col { flex-direction: column; align-items: center; }
+
+/* 強化した施設の見た目（Lv2：銀、Lv3：金のオーラ） */
+.tile.obj.up2 { background: radial-gradient(circle, #f1f5f9 0%, #aed581 75%); box-shadow: inset 0 0 0 2px #cbd5e1, inset 0 -3px 0 rgba(0, 0, 0, .25); }
+.tile.obj.up2 .em { transform: scale(1.08); filter: drop-shadow(0 0 3px #fff); }
+.tile.obj.up3 { background: radial-gradient(circle, #fff6b0 0%, #ffd54f 45%, #aed581 85%); box-shadow: inset 0 0 0 2px #f59e0b, 0 0 10px rgba(251, 191, 36, .8); z-index: 1; }
+.tile.obj.up3 .em { transform: scale(1.15); filter: drop-shadow(0 0 6px gold) drop-shadow(0 0 2px #fff); animation: upg-glow 2s ease-in-out infinite; }
+@keyframes upg-glow { 0%, 100% { filter: drop-shadow(0 0 4px gold) drop-shadow(0 0 2px #fff); } 50% { filter: drop-shadow(0 0 10px gold) drop-shadow(0 0 4px #fff); } }
+.tile .upg-badge {
+  position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%); white-space: nowrap;
+  font-size: clamp(7px, .18em, 11px); line-height: 1.3; padding: 0 4px; border-radius: 6px;
+  background: linear-gradient(#94a3b8, #64748b); color: #fff; font-weight: 800; letter-spacing: -1px;
+}
+.tile.up3 .upg-badge { background: linear-gradient(#fbbf24, #d97706); text-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
+.tile .upg-spark { position: absolute; right: 4%; top: 2%; font-size: clamp(8px, .22em, 14px); animation: upg-twinkle 1.6s ease-in-out infinite; }
+.tile .upg-spark img.emo { width: 1em; height: 1em; }
+@keyframes upg-twinkle { 0%, 100% { opacity: .3; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.15); } }

@@ -110,7 +110,7 @@ window.AK = window.AK || {};
   AK.UPG_COST = { N: [150, 400], R: [300, 800], SR: [600, 1500], SSR: [1200, 3000] };
   AK.isUpgradable = (id) => ['speed', 'coin', 'xp', 'guard', 'shop', 'castle'].includes((AK.ITEMS[id] || {}).effect);
   AK.upgLv = (id) => (AK.S && AK.S.upg[id]) || 1;
-  AK.UPG_COST_EFFECT = { guard: [300, 5000] }; // かかしは強力なので Lv3 はかなり高い
+  AK.UPG_COST_EFFECT = { guard: [1200, 5000] }; // かかしは強力なので Lv3 はかなり高い
   AK.upgCost = (id) => {
     const lv = AK.upgLv(id), it = AK.ITEMS[id];
     return lv >= AK.UPG_MAX ? null : (AK.UPG_COST_EFFECT[it.effect] || AK.UPG_COST[it.rarity])[lv - 1];

@@ -174,11 +174,14 @@
     }
     const i = it(t);
     if (i.type !== 'crop') {
-      const sig = 'obj' + t.id + i.emoji;
+      const lv = AK.isUpgradable(t.id) ? AK.upgLv(t.id) : 1; // 強化レベルで見た目も変わる
+      const sig = 'obj' + t.id + i.emoji + lv;
       if (Farm.sig[k] !== sig) {
         Farm.sig[k] = sig;
-        el.className = `tile obj r-${i.rarity}${i.gold ? ' gold' : ''}`;
-        el.innerHTML = `<span class="em">${i.emoji}</span>`;
+        el.className = `tile obj r-${i.rarity}${i.gold ? ' gold' : ''}${lv > 1 ? ' up' + lv : ''}`;
+        el.innerHTML = `<span class="em">${i.emoji}</span>`
+          + (lv > 1 ? `<span class="upg-badge">${'★'.repeat(lv)}</span>` : '')
+          + (lv >= 3 ? '<span class="upg-spark">✨</span>' : '');
       }
       return;
     }
