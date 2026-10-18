@@ -124,7 +124,7 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .farm-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .field-area { width: min(100%, max(300px, calc(100dvh - 400px))); margin: 0 auto; }
 .field-wrap {
-  width: 100%;
+  width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
   background: linear-gradient(#7cb342, #689f38);
   border-radius: 18px; padding: 8px; box-shadow: inset 0 0 0 4px #558b2f, var(--shadow);
 }
@@ -685,3 +685,12 @@ img.emo {
 .tile .upg-spark { position: absolute; right: 4%; top: 2%; font-size: clamp(8px, .22em, 14px); animation: upg-twinkle 1.6s ease-in-out infinite; }
 .tile .upg-spark img.emo { width: 1em; height: 1em; }
 @keyframes upg-twinkle { 0%, 100% { opacity: .3; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.15); } }
+
+/* 大きくなった家（2×2・3×3）：庭と石だたみ */
+.tile.obj.big-house {
+  background: radial-gradient(ellipse at 50% 88%, #d6c3a5 0 18%, transparent 19%),
+    radial-gradient(circle at 15% 80%, #f9a8d4 0 3%, transparent 4%), radial-gradient(circle at 85% 78%, #fde047 0 3%, transparent 4%),
+    linear-gradient(#c5e1a5, #aed581);
+  box-shadow: inset 0 0 0 3px #8bc34a, inset 0 -4px 0 rgba(0, 0, 0, .15);
+}
+.tile.obj.big-house .em { filter: drop-shadow(0 4px 2px rgba(0, 0, 0, .25)); }

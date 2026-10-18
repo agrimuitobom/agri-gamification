@@ -14,6 +14,38 @@
   const it = (t) => AK.ITEMS[t.id];
   const isCrop = (t) => !!t && it(t) && it(t).type === 'crop';
   const keyOf = (x, y) => `${x},${y}`;
+  // 家の大きさ（マス数）：領土が広がると大きくなる 1×1 → 2×2（7×7〜）→ 3×3（10×10）
+  Farm.houseSize = (land = AK.S.land) => (land >= 10 ? 3 : land >= 7 ? 2 : 1);
+  const houseKey = () => Object.keys(AK.S.tiles).find((k) => AK.S.tiles[k].id === 'house');
+  /** 家がおおっているマス（家の左上マス以外）。ここには何も置けない */
+  function houseCovered() {
+    const k = houseKey(), n = Farm.houseSize(), set = new Set();
+    if (!k || n === 1) return set;
+    const [hx, hy] = k.split(',').map(Number);
+    for (let dy = 0; dy < n; dy++) for (let dx = 0; dx < n; dx++) if (dx || dy) set.add(keyOf(hx + dx, hy + dy));
+    return set;
+  }
+  /** 家が大きくなったとき：はみ出さない位置に動かし、下じきになったアイテムは倉庫へもどす */
+  Farm.fixHouse = function () {
+    const S = AK.S, n = Farm.houseSize();
+    let k = houseKey();
+    if (!k || n === 1) return;
+    let [hx, hy] = k.split(',').map(Number);
+    const nx = Math.min(hx, S.land - n), ny = Math.min(hy, S.land - n);
+    if (nx !== hx || ny !== hy) { S.tiles[keyOf(nx, ny)] = S.tiles[k]; delete S.tiles[k]; k = keyOf(nx, ny); }
+    const moved = [];
+    houseCovered().forEach((c) => {
+      const t = S.tiles[c];
+      if (!t) return;
+      AK.giveBack(t.id);
+      moved.push(AK.ITEMS[t.id] ? AK.ITEMS[t.id].emoji : '');
+      delete S.tiles[c];
+    });
+    if (moved.length) {
+      AK.save();
+      setTimeout(() => AK.toast(`🏠 家が大きくなったので、家の下にあった ${moved.join('')} を倉庫にもどしました`), 400);
+    }
+  };
   const buildingsOf = (effect) => Object.entries(AK.S.tiles).filter(([, t]) => it(t) && it(t).effect === effect);
   /** マス k に効いている施設のうち、いちばん高い強化レベル（効いていなければ 0）。効果範囲は強化レベルで広がる */
   function nearLv(k, effect) {
@@ -86,18 +118,30 @@
       hasTractor ? h('button', { class: 'btn small gold', onclick: harvestAll }, '🚜 一括収穫') : null,
       h('button', { class: 'btn small gold', onclick: () => Farm.workshop() }, '🛠️ 王国づくり'),
       h('button', { class: 'btn small', onclick: expandDialog, disabled: S.land >= MAX_LAND }, S.land >= MAX_LAND ? '🗺️ 領土MAX' : '🗺️ 領土を広げる'),
-      h('button', { class: 'btn small', onclick: AK.showHelp }, '❓ 遊び方'));
+      h('button', { class: 'btn small', onclick: AK.showHelp }, '❓ 遊び方'),
+      S.land >= 7 ? h('button', {
+        class: 'btn small', onclick: () => { S.settings.fitAll = !S.settings.fitAll; AK.save(); AK.refresh(); },
+      }, S.settings.fitAll ? '🔍 拡大して見る' : '🗺️ 全体を見る') : null);
 
     const D = S.design;
-    const grid = h('div', { class: 'grid ground-' + (D.ground || 'default'), style: { gridTemplateColumns: `repeat(${S.land}, 1fr)` } });
+    Farm.fixHouse();
+    const covered = houseCovered(), hk = houseKey(), hn = Farm.houseSize();
+    const zoom = S.land >= 7 && !S.settings.fitAll; // 広い王国は大きいマスで表示（横スクロール）
+    const grid = h('div', { class: 'grid ground-' + (D.ground || 'default') + (zoom ? ' zoom' : ''), style: { gridTemplateColumns: `repeat(${S.land}, 1fr)` } });
     for (let y = 0; y < S.land; y++) {
       for (let x = 0; x < S.land; x++) {
         const k = keyOf(x, y);
-        const el = h('button', { class: 'tile', onclick: () => onTile(k) });
+        if (covered.has(k)) continue;
+        const n = k === hk ? hn : 1;
+        const el = h('button', {
+          class: 'tile' + (n > 1 ? ' big-house' : ''), onclick: () => onTile(k),
+          style: { gridColumn: `${x + 1} / span ${n}`, gridRow: `${y + 1} / span ${n}`, fontSize: n > 1 ? n * 1.1 + 'em' : '', aspectRatio: n > 1 ? 'auto' : '' },
+        });
         Farm.tileEls[k] = el;
         grid.append(el);
       }
     }
+    if (zoom) grid.style.width = `max(100%, ${S.land * 52}px)`;
     const top = AK.designOf('top'), bottom = AK.designOf('bottom');
     // 景色：絵文字を並べるもの（row）と、1枚のイラスト（art）がある
     const scenery = (d, cls) => {
@@ -180,7 +224,7 @@
       const sig = 'obj' + t.id + i.emoji + lv;
       if (Farm.sig[k] !== sig) {
         Farm.sig[k] = sig;
-        el.className = `tile obj r-${i.rarity}${i.gold ? ' gold' : ''}${lv > 1 ? ' up' + lv : ''}`;
+        el.className = `tile obj r-${i.rarity}${i.gold ? ' gold' : ''}${lv > 1 ? ' up' + lv : ''}${t.id === 'house' && Farm.houseSize() > 1 ? ' big-house' : ''}`;
         el.innerHTML = `<span class="em">${i.emoji}</span>`
           + (lv > 1 ? `<span class="upg-badge">${'★'.repeat(lv)}</span>` : '')
           + (lv >= 3 ? '<span class="upg-spark">✨</span>' : '');
@@ -234,6 +278,12 @@
     }
     if (!t) {
       if (!sel) { AK.toast('下のアイテムを選んでから、空いているマスをタップしよう'); return; }
+      if (sel === 'house' && Farm.houseSize() > 1) {
+        const n = Farm.houseSize(), [x, y] = k.split(',').map(Number);
+        let ok = x + n <= S.land && y + n <= S.land;
+        for (let dy = 0; dy < n && ok; dy++) for (let dx = 0; dx < n && ok; dx++) if (S.tiles[keyOf(x + dx, y + dy)]) ok = false;
+        if (!ok) { AK.toast(`🏠 家は ${n}×${n} マスの大きさ。このマスから右下に ${n}×${n} の空きが必要です`); return; }
+      }
       if (!AK.useItem(sel)) { Farm.selected = null; AK.refresh(); return; }
       const i = AK.ITEMS[sel];
       S.tiles[k] = i.type === 'crop' ? { id: sel, p: 0 } : { id: sel };
