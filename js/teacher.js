@@ -87,7 +87,7 @@
     const row = {
       uid, name: d.name || '', realName: d.realName || '', email: d.email || '',
       level: st.level || 1, answered: st.answered || 0, correct: st.correct || 0,
-      acc: pct(st.correct || 0, st.answered || 0), kantei: st.kantei || 0, land: st.land || 4,
+      acc: pct(st.correct || 0, st.answered || 0), kantei: st.kantei || 0, land: st.land || 3,
       week: st.weekKey === AK.weekKey() ? (st.weekCorrect || 0) : 0, dex: st.dex || 0, boss: st.bossWins || 0,
       lastPlay: st.lastPlay || '', wrong: st.wrong || [], qlog: st.qlog || {},
     };

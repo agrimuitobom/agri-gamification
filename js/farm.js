@@ -9,13 +9,13 @@
     { e: '🐛', n: 'アオムシ' }, { e: '🐞', n: 'テントウムシダマシ' },
     { e: '🦗', n: 'バッタ' }, { e: '🐌', n: 'ナメクジ' }, { e: '🍄', n: 'カビ（病気）' },
   ];
-  const MAX_LAND = 10;
+  const MAX_LAND = 9;
 
   const it = (t) => AK.ITEMS[t.id];
   const isCrop = (t) => !!t && it(t) && it(t).type === 'crop';
   const keyOf = (x, y) => `${x},${y}`;
-  // 家の大きさ（マス数）：領土が広がると大きくなる 1×1 → 2×2（7×7〜）→ 3×3（10×10）
-  Farm.houseSize = (land = AK.S.land) => (land >= 10 ? 3 : land >= 7 ? 2 : 1);
+  // 家の大きさ（マス数）：領土が広がると大きくなる 1×1 → 2×2（6×6〜）→ 3×3（9×9）
+  Farm.houseSize = (land = AK.S.land) => (land >= 9 ? 3 : land >= 6 ? 2 : 1);
   const houseKey = () => Object.keys(AK.S.tiles).find((k) => AK.S.tiles[k].id === 'house');
   /** 家がおおっているマス（家の左上マス以外）。ここには何も置けない */
   function houseCovered() {
@@ -27,7 +27,18 @@
   }
   /** 家が大きくなったとき：はみ出さない位置に動かし、下じきになったアイテムは倉庫へもどす */
   Farm.fixHouse = function () {
-    const S = AK.S, n = Farm.houseSize();
+    const S = AK.S;
+    if (S.land > MAX_LAND) { // 以前の最大（10×10）から縮めたとき：はみ出したアイテムは倉庫へ
+      S.land = MAX_LAND;
+      Object.keys(S.tiles).forEach((c) => {
+        const [x, y] = c.split(',').map(Number);
+        if (x < S.land && y < S.land) return;
+        if (S.tiles[c].id === 'house') S.tiles[keyOf(Math.min(x, S.land - 1), Math.min(y, S.land - 1))] = S.tiles[c];
+        else AK.giveBack(S.tiles[c].id);
+        delete S.tiles[c];
+      });
+    }
+    const n = Farm.houseSize();
     let k = houseKey();
     if (!k || n === 1) return;
     let [hx, hy] = k.split(',').map(Number);
@@ -67,9 +78,9 @@
   }
   const isReady = (t) => isCrop(t) && t.bug == null && t.p >= needTime(t);
   const speedOf = (k) => effMult(k, 'speed') * (AK.S.tiles[k] && AK.inSeason(AK.S.tiles[k].id) ? 1.5 : 1);
-  // 領土拡張の費用（4×4→5×5 から 9×9→10×10 まで）。広くなるほど大きく上がる
+  // 領土拡張の費用（3×3→4×4 から 8×8→9×9 まで）。広くなるほど大きく上がる
   const EXPAND_COST = [300, 800, 2000, 4000, 7000, 12000];
-  Farm.expandCost = (land) => EXPAND_COST[land - 4] ?? EXPAND_COST[EXPAND_COST.length - 1];
+  Farm.expandCost = (land) => EXPAND_COST[land - 3] ?? EXPAND_COST[EXPAND_COST.length - 1];
 
   Farm.readyCount = () => Object.values(AK.S.tiles).filter((t) => isReady(t) || (isCrop(t) && t.bug != null)).length;
 
