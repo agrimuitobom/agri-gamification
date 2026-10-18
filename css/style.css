@@ -658,3 +658,14 @@ img.emo {
   z-index: 220; font-size: 40px; pointer-events: none; animation: instBounce 1s ease-in-out infinite;
 }
 @keyframes instBounce { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 10px); } }
+
+/* ============ 修行モード 10問の区切り ============ */
+.set-earned { background: #fff; border-radius: 16px; padding: 12px; margin: 10px auto; max-width: 420px; box-shadow: var(--shadow); }
+.set-items { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 8px 0 4px; }
+.set-item { font-size: 30px; border: 3px solid var(--r-N); border-radius: 12px; padding: 2px 6px; background: #fff; position: relative; }
+.set-item small { font-size: 12px; font-weight: 800; color: var(--sub); }
+.set-item.r-R { border-color: var(--r-R); }
+.set-item.r-SR { border-color: var(--r-SR); background: #faf5ff; }
+.set-item.r-SSR { border-color: var(--r-SSR); background: #fff8d6; }
+.perfect-bonus { font-weight: 800; color: #b45309; font-size: 18px; animation: pulse .8s infinite; }
+.res-btns.col { flex-direction: column; align-items: center; }

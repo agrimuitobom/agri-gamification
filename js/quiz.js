@@ -6,6 +6,7 @@
   const { h } = AK;
   const LABELS = ['A', 'B', 'C', 'D'];
   const RANK_ORDER = { N: 0, R: 1, SR: 2, SSR: 3 };
+  const TRAIN_SET = 10; // 修行モードは10問で一区切り
   const COMBO_MILESTONES = [3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100];
   const MODE_TITLE = { train: '修行', review: '復習ノート', kantei: '鑑定競技', exam: '昇格試験', trouble: 'トラブル発生！', boss: 'ボス戦' };
 
@@ -94,6 +95,7 @@
       opts, mode: opts.mode, field: opts.field || 'mix', queue,
       total: queue ? queue.length : Infinity,
       idx: 0, correct: 0, combo: 0, maxCombo: 0, results: [],
+      set: { from: 0, coins: 0, xp: 0, items: [] }, // 修行モードの1セット分の成績
     };
     if (opts.mode === 'boss') {
       const b = AK.bossToday();
@@ -158,7 +160,7 @@
     const head = h('div', { class: 'q-head' },
       h('button', { class: 'q-quit', onclick: quit, 'aria-label': 'やめる' }, '✕'),
       h('div', { class: 'q-title' }, s.opts.title || MODE_TITLE[s.mode]),
-      h('div', { class: 'q-prog' }, s.queue ? `${s.idx + 1} / ${s.total}` : `第${s.idx + 1}問`));
+      h('div', { class: 'q-prog' }, s.queue ? `${s.idx + 1} / ${s.total}` : s.mode === 'train' ? `${(s.idx % TRAIN_SET) + 1} / ${TRAIN_SET}` : `第${s.idx + 1}問`));
     s.comboEl = h('div', { class: 'q-combo' });
     updateCombo();
     const timerBar = s.mode === 'kantei' ? h('div', { class: 'q-timer' }, h('i')) : null;
@@ -261,6 +263,7 @@
       s.correct++;
       if (!s.tooFast) s.combo++;
       s.maxCombo = Math.max(s.maxCombo, s.combo);
+      if (s.set) s.set.maxCombo = Math.max(s.set.maxCombo || 0, s.combo);
       S.stats.correct++;
       S.stats.byField[q.f].c++;
       S.stats.bestCombo = Math.max(S.stats.bestCombo, s.combo);
@@ -333,6 +336,7 @@
     if (s.mode === 'trouble') label = '王国にもどる';
     else if (s.boss) label = s.boss.hp <= 0 ? '🏆 報酬を受け取る' : s.hearts <= 0 ? '結果を見る' : '次の攻撃 ⚔️';
     else if (s.queue && s.idx >= s.total - 1) label = '結果を見る ▶';
+    else if (s.mode === 'train' && (s.idx + 1) % TRAIN_SET === 0) label = '10問の結果を見る ▶';
     const btn = h('button', { class: 'btn primary big next-btn', onclick: () => s && s.next && s.next() }, label);
     fb.append(btn);
     // 連打対策：まちがえたら解説を読む時間（3秒）は次に進めない
@@ -358,6 +362,7 @@
     if (AK.lowAccuracy()) {
       AK.addCoins(1);
       AK.addXP(5);
+      s.set.coins += 1; s.set.xp += 5;
       fb.append(h('div', { class: 'warn-box' }, '🐢 最近の正答率が低いので報酬ダウン中（アイテムなし）。解説をよく読んで、正答率4割以上をめざそう！'),
         h('div', { class: 'reward-sub' }, '+5 XP　+1 💰'));
       return;
@@ -367,6 +372,8 @@
     const coins = fever ? 6 : 3;
     const drops = AK.rollAndGive(fever ? 2 : 1, s.q.f, s.combo + (s.mode === 'review' ? 5 : 0));
     AK.addCoins(coins);
+    s.set.coins += coins; s.set.xp += xp;
+    drops.forEach((d) => s.set.items.push(d.id));
     const box = h('div', { class: 'reward' });
     fb.append(box);
     AK.showDrops(box, drops, `+${xp} XP　+${coins} 💰${fever ? '　（FEVER 2倍！）' : ''}`);
@@ -383,6 +390,7 @@
       return;
     }
     s.idx++;
+    if (s.mode === 'train' && s.idx % TRAIN_SET === 0) { finishSet(); return; }
     if (s.boss && (s.boss.hp <= 0 || s.hearts <= 0)) { finishBoss(s.boss.hp <= 0); return; }
     if (s.queue && s.idx >= s.total) { finish(); return; }
     renderQ();
@@ -395,14 +403,66 @@
     root.append(h('div', { class: 'q-head' }, h('div', { class: 'q-title' }, s.opts.title || MODE_TITLE[s.mode])),
       h('div', { class: 'q-body result' }, ...nodes));
   }
-  function resultList() {
+  function resultList(list = s.results) {
     return h('div', { class: 'res-list' }, h('h3', {}, '📝 ふりかえり'),
-      s.results.map((r, i) => h('details', { class: 'res-item ' + (r.ok ? 'ok' : 'ng') },
+      list.map((r, i) => h('details', { class: 'res-item ' + (r.ok ? 'ok' : 'ng') },
         h('summary', {}, `${r.ok ? '⭕' : '❌'} ${i + 1}. ${r.q.q}`),
         h('div', { class: 'res-detail' },
           h('div', {}, `あなたの答え：${r.chosen}`),
           h('div', {}, `正解：${r.q.c[0]}`),
           h('div', { class: 'explain' }, '💡 ' + r.q.e)))));
+  }
+
+  /** 修行モード：10問ごとの区切り。続けるか、王国にもどるかを選ぶ */
+  function finishSet() {
+    clearTimer();
+    const list = s.results.slice(s.set.from);
+    const n = list.filter((r) => r.ok).length, total = list.length;
+    const perfect = n === total;
+    const msg = perfect ? ['🎉 パーフェクト！', 'すべて正解！農業マスターへの道を一歩前進！']
+      : n >= 8 ? ['✨ すばらしい！', 'この調子でどんどん進もう！']
+        : n >= 5 ? ['👍 いい調子！', '間違えた問題は解説を見直しておこう。']
+          : ['💪 ナイスチャレンジ！', '間違えた問題は復習ノートで練習できるよ。'];
+    let bonusDrops = [];
+    if (perfect) {
+      AK.addCoins(30);
+      s.set.coins += 30;
+      bonusDrops = AK.rollAndGive(1, s.field, 10);
+    }
+    const counts = {};
+    s.set.items.forEach((id) => { counts[id] = (counts[id] || 0) + 1; });
+    const field = AK.FIELDS[s.field] ? AK.FIELDS[s.field] : { name: 'ミックス', icon: '🎲' };
+    const bonusBox = h('div', { class: 'reward' });
+    resultScreen(
+      h('div', { class: 'exam-result pass' }, msg[0]),
+      h('div', { class: 'score' }, `${n} / ${total} 問正解`),
+      h('p', { class: 'center' }, msg[1]),
+      h('div', { class: 'set-earned' },
+        h('div', { class: 'small' }, `この${total}問で手に入れたもの`),
+        h('div', { class: 'set-items' }, Object.keys(counts).length
+          ? Object.entries(counts).map(([id, c]) => h('span', { class: 'set-item r-' + AK.ITEMS[id].rarity }, AK.ITEMS[id].emoji, c > 1 ? h('small', {}, '×' + c) : null))
+          : h('span', { class: 'small' }, 'なし')),
+        h('div', { class: 'reward-sub' }, `+${s.set.xp} XP　+${s.set.coins} 💰　最大 ${s.set.maxCombo || 0} コンボ`)),
+      perfect ? h('div', { class: 'perfect-bonus' }, '🏆 パーフェクトボーナス！ +30 💰') : null,
+      bonusBox,
+      h('div', { class: 'res-btns col' },
+        h('button', {
+          class: 'btn primary big', onclick: () => {
+            s.set = { from: s.results.length, coins: 0, xp: 0, items: [] };
+            renderQ();
+          },
+        }, `▶ ${field.name}をもう10問`),
+        h('div', { class: 'res-btns' },
+          h('button', { class: 'btn', onclick: () => { close(); AK.go('quiz'); } }, '📝 メニューへ'),
+          h('button', { class: 'btn gold', onclick: () => { close(); AK.go('farm'); } }, '🏰 王国にもどる'))),
+      resultList(list));
+    if (perfect) {
+      AK.showDrops(bonusBox, bonusDrops);
+      AK.Sound.play('levelup');
+      AK.FX.confetti(150);
+    } else if (n >= 8) { AK.Sound.play('rare'); AK.FX.confetti(70); }
+    AK.save();
+    AK.emit('change');
   }
 
   function finish() {
