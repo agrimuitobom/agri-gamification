@@ -340,9 +340,9 @@
     else if (s.mode === 'train' && (s.idx + 1) % TRAIN_SET === 0) label = '10問の結果を見る ▶';
     const btn = h('button', { class: 'btn primary big next-btn', onclick: () => s && s.next && s.next() }, label);
     fb.append(btn);
-    // 連打対策：まちがえたら解説を読む時間（3秒）は次に進めない
+    // 連打対策：まちがえたら解説を読む時間は次に進めない（解説の長さに応じて5〜10秒）
     if (!ok) {
-      let left = 3;
+      let left = Math.min(10, Math.max(5, Math.round(q.e.length / 10)));
       btn.disabled = true;
       btn.textContent = `解説を読もう… ${left}`;
       const t = setInterval(() => {
